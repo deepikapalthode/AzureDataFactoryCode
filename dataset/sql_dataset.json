@@ -1,0 +1,53 @@
+{
+	"name": "sql_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sql_ls",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ref_no",
+				"type": "nvarchar"
+			},
+			{
+				"name": "period",
+				"type": "decimal",
+				"precision": 8,
+				"scale": 4
+			},
+			{
+				"name": "datavalue",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "emp_status",
+				"type": "char"
+			},
+			{
+				"name": "emp_subject",
+				"type": "nvarchar"
+			},
+			{
+				"name": "emp_group",
+				"type": "nvarchar"
+			},
+			{
+				"name": "emp_series1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "emp_series2",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "emp"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
