@@ -1,0 +1,9 @@
+{
+	"name": "trail101ADF",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "0d480115-13c4-4e88-8ab9-f8c9895d415d",
+		"tenantId": "bf003e20-d3dd-43b6-aff0-1233e0bbdd55"
+	}
+}
