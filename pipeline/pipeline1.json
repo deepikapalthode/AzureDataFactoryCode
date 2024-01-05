@@ -5,7 +5,14 @@
 			{
 				"name": "ForEach1",
 				"type": "ForEach",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
@@ -43,7 +50,7 @@
 									"type": "DelimitedTextSink",
 									"storeSettings": {
 										"type": "AzureBlobStorageWriteSettings",
-										"copyBehavior": "FlattenHierarchy"
+										"copyBehavior": "PreserveHierarchy"
 									},
 									"formatSettings": {
 										"type": "DelimitedTextWriteSettings",
