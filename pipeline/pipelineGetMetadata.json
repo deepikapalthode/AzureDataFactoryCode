@@ -16,11 +16,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "DSblobsource",
+						"referenceName": "blobFile",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
-						"childItems"
+						"structure"
 					],
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
@@ -31,8 +31,37 @@
 						"type": "DelimitedTextReadSettings"
 					}
 				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "moviesFile",
+					"value": {
+						"value": "@activity('Get Metadata1').output.structure",
+						"type": "Expression"
+					}
+				}
 			}
 		],
+		"variables": {
+			"moviesFile": {
+				"type": "Array"
+			}
+		},
 		"annotations": []
 	}
 }
