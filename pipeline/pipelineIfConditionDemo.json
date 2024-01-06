@@ -1,5 +1,5 @@
 {
-	"name": "pipeline4",
+	"name": "pipelineIfConditionDemo",
 	"properties": {
 		"activities": [
 			{
@@ -8,6 +8,10 @@
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
+					"expression": {
+						"value": "@variables('route')",
+						"type": "Expression"
+					},
 					"ifFalseActivities": [
 						{
 							"name": "Copy data2",
