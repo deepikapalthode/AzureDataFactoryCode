@@ -1,5 +1,5 @@
 {
-	"name": "pipelineForeach",
+	"name": "copyFilesToMultipleFolders",
 	"properties": {
 		"activities": [
 			{
