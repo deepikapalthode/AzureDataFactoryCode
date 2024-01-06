@@ -1,0 +1,66 @@
+{
+	"name": "pipelineSwitchDemo",
+	"properties": {
+		"activities": [
+			{
+				"name": "Switch1",
+				"type": "Switch",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@pipeline().parameters.pfile",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "customer",
+							"activities": [
+								{
+									"name": "Customer Wait",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 1
+									}
+								}
+							]
+						},
+						{
+							"value": "product",
+							"activities": [
+								{
+									"name": "Product Wait",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 1
+									}
+								}
+							]
+						}
+					],
+					"defaultActivities": [
+						{
+							"name": "Default Wait",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 1
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"pfile": {
+				"type": "string"
+			}
+		},
+		"annotations": []
+	}
+}
