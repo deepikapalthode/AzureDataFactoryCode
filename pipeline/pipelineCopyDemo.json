@@ -19,16 +19,24 @@
 						"type": "DelimitedTextSource",
 						"additionalColumns": [
 							{
+								"name": "filePath",
+								"value": "$$FILEPATH"
+							},
+							{
+								"name": "fileName",
+								"value": "$$FILENAME"
+							},
+							{
 								"name": "modifiedOn",
 								"value": {
-									"value": "@pipeline().parameters.modifiedOn",
+									"value": "@utcnow()",
 									"type": "Expression"
 								}
 							}
 						],
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
-							"fileListPath": "input/fileList",
+							"recursive": false,
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -49,55 +57,6 @@
 					"enableStaging": false,
 					"translator": {
 						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "cast",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "cast",
-									"type": "String",
-									"physicalType": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "crew",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "crew",
-									"type": "String",
-									"physicalType": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "id",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "id",
-									"type": "String",
-									"physicalType": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "modifiedOn",
-									"type": "String"
-								},
-								"sink": {
-									"name": "modifiedOn",
-									"type": "String",
-									"physicalType": "String"
-								}
-							}
-						],
 						"typeConversion": true,
 						"typeConversionSettings": {
 							"allowDataTruncation": true,
@@ -107,7 +66,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DSblobsource",
+						"referenceName": "DSmoviesCSV",
 						"type": "DatasetReference"
 					}
 				],
@@ -119,12 +78,6 @@
 				]
 			}
 		],
-		"parameters": {
-			"modifiedOn": {
-				"type": "string",
-				"defaultValue": "@utcnow()"
-			}
-		},
 		"annotations": []
 	}
 }
