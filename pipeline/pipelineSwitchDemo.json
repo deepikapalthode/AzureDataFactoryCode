@@ -9,7 +9,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"on": {
-						"value": "@pipeline().parameters.pfile",
+						"value": "@toLower(pipeline().parameters.pfile)",
 						"type": "Expression"
 					},
 					"cases": [
