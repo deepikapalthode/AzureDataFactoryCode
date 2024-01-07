@@ -3,30 +3,14 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Wait1",
-				"type": "Wait",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"waitTimeInSeconds": 1
-				}
-			},
-			{
 				"name": "Append variable1",
 				"type": "AppendVariable",
-				"dependsOn": [
-					{
-						"activity": "Wait1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "marks",
 					"value": {
-						"value": "80",
+						"value": "@int(80)",
 						"type": "Expression"
 					}
 				}
@@ -54,6 +38,30 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Set variable2",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Append variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "firstMarks",
+					"value": {
+						"value": "@{variables('marks')[0]}",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
@@ -68,6 +76,9 @@
 			},
 			"total": {
 				"type": "Array"
+			},
+			"firstMarks": {
+				"type": "String"
 			}
 		},
 		"annotations": []
