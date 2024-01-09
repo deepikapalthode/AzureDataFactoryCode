@@ -1,0 +1,65 @@
+{
+	"name": "dataflowColumnPatternsDemo",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "customerTable",
+						"type": "DatasetReference"
+					},
+					"name": "sourceCustomerTable"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DemoCustomerTable",
+						"type": "DatasetReference"
+					},
+					"name": "sinkDemoCustomerTable"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          CustID as integer,",
+				"          FirstName as string,",
+				"          LastName as string,",
+				"          City as string,",
+				"          ZipCode as string,",
+				"          AddressLine1 as string,",
+				"          AddressLine2 as string,",
+				"          Country as string,",
+				"          MobileNumber as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceCustomerTable",
+				"sourceCustomerTable sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          CustID as integer,",
+				"          FirstName as string,",
+				"          LastName as string,",
+				"          City as string,",
+				"          ZipCode as string,",
+				"          AddressLine1 as string,",
+				"          AddressLine2 as string,",
+				"          Country as string,",
+				"          MobileNumber as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkDemoCustomerTable"
+			]
+		}
+	}
+}
