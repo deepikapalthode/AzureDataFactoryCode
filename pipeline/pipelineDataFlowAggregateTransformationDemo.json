@@ -1,9 +1,9 @@
 {
-	"name": "pipelineDataFlowDemo1",
+	"name": "pipelineDataFlowAggregateTransformationDemo",
 	"properties": {
 		"activities": [
 			{
-				"name": "Data flow1",
+				"name": "AggregateDataFlow",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflow1",
+						"referenceName": "dataflowAggregateDemo",
 						"type": "DataFlowReference"
 					},
 					"compute": {
