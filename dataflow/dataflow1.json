@@ -1,0 +1,60 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dsMovieRatings",
+						"type": "DatasetReference"
+					},
+					"name": "movieRatings",
+					"description": "Import data frommovieratings.csv"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dsratings",
+						"type": "DatasetReference"
+					},
+					"name": "sinkMovieRatings"
+				}
+			],
+			"transformations": [
+				{
+					"name": "yearFilter"
+				},
+				{
+					"name": "aggregateOnRating"
+				},
+				{
+					"name": "yearColumn"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          sno as string,",
+				"          movie as string,",
+				"          releasedate as string,",
+				"          rating as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> movieRatings",
+				"movieRatings filter(toInteger(year(toDate(releasedate, 'yyyy-MM-dd', 'en-US'))) >= 2015 && toInteger(year(toDate(releasedate, 'yyyy-MM-dd', 'en-US'))) <= 2020) ~> yearFilter",
+				"yearColumn aggregate(groupBy(yearOfRelease,",
+				"          rating),",
+				"     ratingCount = count(rating)) ~> aggregateOnRating",
+				"yearFilter derive(yearOfRelease = year(toDate(releasedate,'yyyy-mm-dd','en-us'))) ~> yearColumn",
+				"aggregateOnRating sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['moviesratings'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sinkMovieRatings"
+			]
+		}
+	}
+}

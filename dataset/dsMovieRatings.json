@@ -1,0 +1,40 @@
+{
+	"name": "dsMovieRatings",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "MovieRatings.csv",
+				"container": "input"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "sno",
+				"type": "String"
+			},
+			{
+				"name": "movie",
+				"type": "String"
+			},
+			{
+				"name": "releasedate",
+				"type": "String"
+			},
+			{
+				"name": "rating",
+				"type": "String"
+			}
+		]
+	}
+}
