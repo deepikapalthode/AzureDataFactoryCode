@@ -13,82 +13,101 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/pipelineScriptActivity')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/dsratings')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "outdataflow"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/emptable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "emp"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sql_dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sql_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
 					{
-						"name": "Script1",
-						"type": "Script",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"linkedServiceName": {
-							"referenceName": "LS_AzureSqlDatabase",
-							"type": "LinkedServiceReference"
-						},
-						"typeProperties": {
-							"scripts": [
-								{
-									"parameters": [
-										{
-											"name": "id",
-											"type": "Int16",
-											"value": "10",
-											"direction": "Input"
-										}
-									],
-									"type": "Query",
-									"text": "select * from dbo.emp where empid = @id;\ndeclare @msg nvarchar(20);\nset @msg = 'hurray';\nprint @msg;"
-								}
-							],
-							"scriptBlockExecutionTimeout": "02:00:00",
-							"logSettings": {
-								"logDestination": "ActivityOutput"
-							}
-						}
+						"name": "ref_no",
+						"type": "nvarchar"
 					},
 					{
-						"name": "Set variable1",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Script1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "name",
-							"value": {
-								"value": "@activity('Script1').output.resultSets[0].rows[0].empname",
-								"type": "Expression"
-							}
-						}
+						"name": "period",
+						"type": "decimal",
+						"precision": 8,
+						"scale": 4
+					},
+					{
+						"name": "datavalue",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "emp_status",
+						"type": "char"
+					},
+					{
+						"name": "emp_subject",
+						"type": "nvarchar"
+					},
+					{
+						"name": "emp_group",
+						"type": "nvarchar"
+					},
+					{
+						"name": "emp_series1",
+						"type": "nvarchar"
+					},
+					{
+						"name": "emp_series2",
+						"type": "nvarchar"
 					}
 				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"name": {
-						"type": "String"
-					}
-				},
-				"annotations": []
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "emp"
+				}
 			},
 			"dependsOn": []
 		},
@@ -249,7 +268,9 @@
 				"annotations": [],
 				"lastPublishTime": "2021-12-30T22:42:04Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/sql_dataset')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/copyFilesToMultipleFolders')]",
@@ -478,6 +499,55 @@
 								"parameters": {}
 							}
 						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipelineDeleteDemo')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Delete1",
+						"type": "Delete",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "deleteFileBlob",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "AzureBlobStorage1",
+									"type": "LinkedServiceReference"
+								},
+								"path": "out11"
+							},
+							"enableLogging": true,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"modifiedDatetimeStart": "2024-01-13T00:00:00.000Z",
+								"modifiedDatetimeEnd": "2024-01-15T05:00:00.000Z",
+								"enablePartitionDiscovery": false
+							}
+						}
 					}
 				],
 				"policy": {
@@ -854,17 +924,84 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/emptable')]"
+			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipelineDeleteDemo')]",
+			"name": "[concat(parameters('factoryName'), '/dataflowAggregateDemo')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dsMovieRatings",
+								"type": "DatasetReference"
+							},
+							"name": "movieRatings",
+							"description": "Import data frommovieratings.csv"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "dsratings",
+								"type": "DatasetReference"
+							},
+							"name": "sinkMovieRatings"
+						}
+					],
+					"transformations": [
+						{
+							"name": "yearFilter"
+						},
+						{
+							"name": "aggregateOnRating"
+						},
+						{
+							"name": "yearColumn"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          sno as string,",
+						"          movie as string,",
+						"          releasedate as string,",
+						"          rating as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> movieRatings",
+						"movieRatings filter(toInteger(year(toDate(releasedate, 'yyyy-MM-dd', 'en-US'))) >= 2015 && toInteger(year(toDate(releasedate, 'yyyy-MM-dd', 'en-US'))) <= 2020) ~> yearFilter",
+						"yearColumn aggregate(groupBy(yearOfRelease,",
+						"          rating),",
+						"     ratingCount = count(rating)) ~> aggregateOnRating",
+						"yearFilter derive(yearOfRelease = year(toDate(releasedate,'yyyy-mm-dd','en-us'))) ~> yearColumn",
+						"aggregateOnRating sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['moviesratings'],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sinkMovieRatings"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/dsratings')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipelineDataFlowAggregateTransformationDemo')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Delete1",
-						"type": "Delete",
+						"name": "AggregateDataFlow",
+						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -875,26 +1012,21 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataset": {
-								"referenceName": "deleteFileBlob",
-								"type": "DatasetReference",
-								"parameters": {}
+							"dataflow": {
+								"referenceName": "dataflowAggregateDemo",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"movieRatings": {},
+									"sinkMovieRatings": {}
+								}
 							},
-							"logStorageSettings": {
-								"linkedServiceName": {
-									"referenceName": "AzureBlobStorage1",
-									"type": "LinkedServiceReference"
-								},
-								"path": "out11"
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
 							},
-							"enableLogging": true,
-							"storeSettings": {
-								"type": "AzureBlobStorageReadSettings",
-								"recursive": true,
-								"modifiedDatetimeStart": "2024-01-13T00:00:00.000Z",
-								"modifiedDatetimeEnd": "2024-01-15T05:00:00.000Z",
-								"enablePartitionDiscovery": false
-							}
+							"traceLevel": "Fine"
 						}
 					}
 				],
@@ -903,7 +1035,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflowAggregateDemo')]"
+			]
 		}
 	]
 }
