@@ -13,6 +13,70 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/deleteFileBlob')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "countries22.csv",
+						"container": "input"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dsMovieRatings')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "MovieRatings.csv",
+						"container": "input"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "sno",
+						"type": "String"
+					},
+					{
+						"name": "movie",
+						"type": "String"
+					},
+					{
+						"name": "releasedate",
+						"type": "String"
+					},
+					{
+						"name": "rating",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/dsratings')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -555,7 +619,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/deleteFileBlob')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pipelineGetMetadata')]",
@@ -990,8 +1056,86 @@
 				}
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/dsMovieRatings')]",
 				"[concat(variables('factoryId'), '/datasets/dsratings')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflowColumnPatternsDemo')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "customerTable",
+								"type": "DatasetReference"
+							},
+							"name": "sourceCustomerTable"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DemoCustomerTable",
+								"type": "DatasetReference"
+							},
+							"name": "sinkDemoCustomerTable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumnFullName"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          CustID as integer,",
+						"          FirstName as string,",
+						"          LastName as string,",
+						"          City as string,",
+						"          ZipCode as string,",
+						"          AddressLine1 as string,",
+						"          AddressLine2 as string,",
+						"          Country as string,",
+						"          MobileNumber as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceCustomerTable",
+						"sourceCustomerTable derive({'fullName'} = iif(",
+						"    isNull(FirstName) || isNull(LastName),",
+						"    coalesce(FirstName, LastName),",
+						"    concat(FirstName, ' ', LastName)",
+						")) ~> derivedColumnFullName",
+						"derivedColumnFullName sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          CustID as integer,",
+						"          FirstName as string,",
+						"          LastName as string,",
+						"          City as string,",
+						"          ZipCode as string,",
+						"          AddressLine1 as string,",
+						"          AddressLine2 as string,",
+						"          Country as string,",
+						"          MobileNumber as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkDemoCustomerTable"
+					]
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pipelineDataFlowAggregateTransformationDemo')]",
@@ -1037,6 +1181,52 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/dataflowAggregateDemo')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipelineDataflowColumnPatterns')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "pipelineDataflowColumnPattern",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflowColumnPatternsDemo",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceCustomerTable": {},
+									"sinkDemoCustomerTable": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflowColumnPatternsDemo')]"
 			]
 		}
 	]
