@@ -1,5 +1,5 @@
 {
-	"name": "dataflowColumnPatternsDemo",
+	"name": "dataflowDerivedColumnDemo",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
