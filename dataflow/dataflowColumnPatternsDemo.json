@@ -21,7 +21,11 @@
 					"name": "sinkDemoCustomerTable"
 				}
 			],
-			"transformations": [],
+			"transformations": [
+				{
+					"name": "derivedColumnFullName"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          CustID as integer,",
@@ -38,7 +42,12 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> sourceCustomerTable",
-				"sourceCustomerTable sink(allowSchemaDrift: true,",
+				"sourceCustomerTable derive({'fullName'} = iif(",
+				"    isNull(FirstName) || isNull(LastName),",
+				"    coalesce(FirstName, LastName),",
+				"    concat(FirstName, ' ', LastName)",
+				")) ~> derivedColumnFullName",
+				"derivedColumnFullName sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          CustID as integer,",
