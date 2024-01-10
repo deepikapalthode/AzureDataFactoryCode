@@ -24,6 +24,9 @@
 			"transformations": [
 				{
 					"name": "derivedColOrderDate"
+				},
+				{
+					"name": "AlterRowOrderDate"
 				}
 			],
 			"scriptLines": [
@@ -39,7 +42,8 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> sourceOrders",
 				"sourceOrders derive(OrderDate = toDate(OrderDate)) ~> derivedColOrderDate",
-				"derivedColOrderDate sink(allowSchemaDrift: true,",
+				"derivedColOrderDate alterRow(updateIf(true())) ~> AlterRowOrderDate",
+				"AlterRowOrderDate sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          OrderID as integer,",
