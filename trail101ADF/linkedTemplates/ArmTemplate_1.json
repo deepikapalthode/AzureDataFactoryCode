@@ -1061,7 +1061,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflowColumnPatternsDemo')]",
+			"name": "[concat(parameters('factoryName'), '/dataflowDerivedColumnDemo')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1199,7 +1199,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "dataflowColumnPatternsDemo",
+								"referenceName": "dataflowDerivedColumnDemo",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
@@ -1222,7 +1222,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/dataflowColumnPatternsDemo')]"
+				"[concat(variables('factoryId'), '/dataflows/dataflowDerivedColumnDemo')]"
 			]
 		}
 	]
