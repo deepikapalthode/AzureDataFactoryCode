@@ -577,7 +577,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "pipelineDataflowColumnPattern",
+						"name": "pipelineDataflowDerivedColumn",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
