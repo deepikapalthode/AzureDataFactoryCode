@@ -24,9 +24,6 @@
 			"transformations": [
 				{
 					"name": "derivedColOrderDate"
-				},
-				{
-					"name": "alterRowOrderDate"
 				}
 			],
 			"scriptLines": [
@@ -42,8 +39,7 @@
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> sourceOrders",
 				"sourceOrders derive(OrderDate = toDate(OrderDate)) ~> derivedColOrderDate",
-				"derivedColOrderDate alterRow(updateIf(true())) ~> alterRowOrderDate",
-				"alterRowOrderDate sink(allowSchemaDrift: true,",
+				"derivedColOrderDate sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          OrderID as integer,",
@@ -53,9 +49,10 @@
 				"          ProductPrice as decimal(10,2)",
 				"     ),",
 				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
 				"     upsertable:false,",
+				"     keys:['OrderID','ProductName'],",
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
