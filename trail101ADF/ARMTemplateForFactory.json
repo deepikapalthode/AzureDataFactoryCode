@@ -431,6 +431,98 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipelineColPatternDF01')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow Col Pattern",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflowColumnPatterns01",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceProducts": {},
+									"sinkProducts": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflowColumnPatterns01')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipelineColumnPatternsdataFlow')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ColumnPatternsDF",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflowColumnPatternsDemo",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceOrders": {},
+									"sinkOrderTable": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflowColumnPatternsDemo')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pipelineCopyDemo')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1718,6 +1810,94 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/OrdersTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "OrderID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ProductName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "OrderDate",
+						"type": "datetime2",
+						"scale": 7
+					},
+					{
+						"name": "Quantity",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ProductPrice",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Orders"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ProductsTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "productid",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "productname",
+						"type": "nvarchar"
+					},
+					{
+						"name": "price",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 4
+					},
+					{
+						"name": "brand",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Products"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSqlDatabase')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/blobFile')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -2245,7 +2425,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflowDerivedColumnDemo')]",
+			"name": "[concat(parameters('factoryName'), '/dataflowColumnPatterns01')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -2254,70 +2434,64 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "customerTable",
+								"referenceName": "ProductsTable",
 								"type": "DatasetReference"
 							},
-							"name": "sourceCustomerTable"
+							"name": "sourceProducts"
 						}
 					],
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "DemoCustomerTable",
+								"referenceName": "ProductsTable",
 								"type": "DatasetReference"
 							},
-							"name": "sinkDemoCustomerTable"
+							"name": "sinkProducts"
 						}
 					],
 					"transformations": [
 						{
-							"name": "derivedColumnFullName"
+							"name": "derivedColumnPrice"
+						},
+						{
+							"name": "alterRowPrice"
 						}
 					],
 					"scriptLines": [
 						"source(output(",
-						"          CustID as integer,",
-						"          FirstName as string,",
-						"          LastName as string,",
-						"          City as string,",
-						"          ZipCode as string,",
-						"          AddressLine1 as string,",
-						"          AddressLine2 as string,",
-						"          Country as string,",
-						"          MobileNumber as string",
+						"          productid as integer,",
+						"          productname as string,",
+						"          price as decimal(10,4),",
+						"          brand as string",
 						"     ),",
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> sourceCustomerTable",
-						"sourceCustomerTable derive(fullName = iif(isNull(FirstName) || isNull(LastName),coalesce(FirstName, LastName),concat(FirstName, ' ', LastName))) ~> derivedColumnFullName",
-						"derivedColumnFullName sink(allowSchemaDrift: true,",
+						"     format: 'table') ~> sourceProducts",
+						"sourceProducts derive(each(match(type=='decimal'), $$ = round($$,2))) ~> derivedColumnPrice",
+						"derivedColumnPrice alterRow(updateIf(true())) ~> alterRowPrice",
+						"alterRowPrice sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
-						"          CustID as integer,",
-						"          FirstName as string,",
-						"          LastName as string,",
-						"          City as string,",
-						"          ZipCode as string,",
-						"          AddressLine1 as string,",
-						"          AddressLine2 as string,",
-						"          Country as string,",
-						"          MobileNumber as string",
+						"          productid as integer,",
+						"          productname as string,",
+						"          price as decimal(10,4),",
+						"          brand as string",
 						"     ),",
 						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
 						"     upsertable:false,",
+						"     keys:['productid','productname'],",
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sinkDemoCustomerTable"
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkProducts"
 					]
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/customerTable')]",
-				"[concat(variables('factoryId'), '/datasets/DemoCustomerTable')]"
+				"[concat(variables('factoryId'), '/datasets/ProductsTable')]"
 			]
 		},
 		{
@@ -2393,97 +2567,79 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/OrdersTable')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/dataflowDerivedColumnDemo')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_AzureSqlDatabase",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "OrderID",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "ProductName",
-						"type": "nvarchar"
-					},
-					{
-						"name": "OrderDate",
-						"type": "datetime2",
-						"scale": 7
-					},
-					{
-						"name": "Quantity",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "ProductPrice",
-						"type": "decimal",
-						"precision": 10,
-						"scale": 2
-					}
-				],
+				"type": "MappingDataFlow",
 				"typeProperties": {
-					"schema": "dbo",
-					"table": "Orders"
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "customerTable",
+								"type": "DatasetReference"
+							},
+							"name": "sourceCustomerTable"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DemoCustomerTable",
+								"type": "DatasetReference"
+							},
+							"name": "sinkDemoCustomerTable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumnFullName"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          CustID as integer,",
+						"          FirstName as string,",
+						"          LastName as string,",
+						"          City as string,",
+						"          ZipCode as string,",
+						"          AddressLine1 as string,",
+						"          AddressLine2 as string,",
+						"          Country as string,",
+						"          MobileNumber as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceCustomerTable",
+						"sourceCustomerTable derive(fullName = iif(isNull(FirstName) || isNull(LastName),coalesce(FirstName, LastName),concat(FirstName, ' ', LastName))) ~> derivedColumnFullName",
+						"derivedColumnFullName sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          CustID as integer,",
+						"          FirstName as string,",
+						"          LastName as string,",
+						"          City as string,",
+						"          ZipCode as string,",
+						"          AddressLine1 as string,",
+						"          AddressLine2 as string,",
+						"          Country as string,",
+						"          MobileNumber as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkDemoCustomerTable"
+					]
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSqlDatabase')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipelineColumnPatternsdataFlow')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ColumnPatternsDF",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "dataflowColumnPatternsDemo",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"sourceOrders": {},
-									"sinkOrderTable": {}
-								},
-								"linkedServiceParameters": {}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/dataflowColumnPatternsDemo')]"
+				"[concat(variables('factoryId'), '/datasets/customerTable')]",
+				"[concat(variables('factoryId'), '/datasets/DemoCustomerTable')]"
 			]
 		}
 	]
