@@ -1,0 +1,45 @@
+{
+	"name": "dataflowColumnPatternsDemo",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "OrdersTable",
+						"type": "DatasetReference"
+					},
+					"name": "sourceOrders"
+				}
+			],
+			"sinks": [
+				{
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColOrderDate"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          OrderID as integer,",
+				"          ProductName as string,",
+				"          OrderDate as timestamp,",
+				"          Quantity as integer,",
+				"          ProductPrice as decimal(10,2)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceOrders",
+				"sourceOrders derive(OrderDate = toDate(OrderDate)) ~> derivedColOrderDate",
+				"derivedColOrderDate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
