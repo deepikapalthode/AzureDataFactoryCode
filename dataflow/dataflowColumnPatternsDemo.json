@@ -18,15 +18,15 @@
 						"referenceName": "OrdersTable",
 						"type": "DatasetReference"
 					},
-					"name": "sinkOrders"
+					"name": "sinkOrderTable"
 				}
 			],
 			"transformations": [
 				{
-					"name": "derivedColOrderDate"
+					"name": "derivedColumnOrderDate"
 				},
 				{
-					"name": "AlterRowOrderDate"
+					"name": "alterRowOrderDate"
 				}
 			],
 			"scriptLines": [
@@ -41,9 +41,9 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> sourceOrders",
-				"sourceOrders derive(OrderDate = toDate(OrderDate)) ~> derivedColOrderDate",
-				"derivedColOrderDate alterRow(updateIf(true())) ~> AlterRowOrderDate",
-				"AlterRowOrderDate sink(allowSchemaDrift: true,",
+				"sourceOrders derive(OrderDate = toDate(OrderDate)) ~> derivedColumnOrderDate",
+				"derivedColumnOrderDate alterRow(updateIf(true())) ~> alterRowOrderDate",
+				"alterRowOrderDate sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          OrderID as integer,",
@@ -60,7 +60,7 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     errorHandlingOption: 'stopOnFirstError') ~> sinkOrders"
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkOrderTable"
 			]
 		}
 	}
