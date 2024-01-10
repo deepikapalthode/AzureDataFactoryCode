@@ -1,0 +1,65 @@
+{
+	"name": "dataflowColumnPatterns01",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ProductsTable",
+						"type": "DatasetReference"
+					},
+					"name": "sourceProducts"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ProductsTable",
+						"type": "DatasetReference"
+					},
+					"name": "sinkProducts"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumnPrice"
+				},
+				{
+					"name": "alterRowPrice"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          productid as integer,",
+				"          productname as string,",
+				"          price as decimal(10,4),",
+				"          brand as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceProducts",
+				"sourceProducts derive(each(match(type == 'decimal'), $$ = round($$,2))) ~> derivedColumnPrice",
+				"derivedColumnPrice alterRow(updateIf(true())) ~> alterRowPrice",
+				"alterRowPrice sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          productid as integer,",
+				"          productname as string,",
+				"          price as decimal(10,4),",
+				"          brand as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['productid','productname'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkProducts"
+			]
+		}
+	}
+}
