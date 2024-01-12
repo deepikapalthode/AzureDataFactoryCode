@@ -1,0 +1,73 @@
+{
+	"name": "dataflowExists",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DemoCustomerTable",
+						"type": "DatasetReference"
+					},
+					"name": "sourceCustomer"
+				},
+				{
+					"dataset": {
+						"referenceName": "citiesTable",
+						"type": "DatasetReference"
+					},
+					"name": "sourcecities"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "output2",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "existsCity"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CustID as integer,",
+				"          FirstName as string,",
+				"          LastName as string,",
+				"          City as string,",
+				"          ZipCode as string,",
+				"          AddressLine1 as string,",
+				"          AddressLine2 as string,",
+				"          Country as string,",
+				"          MobileNumber as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceCustomer",
+				"source(output(",
+				"          cityid as integer,",
+				"          cityname as string,",
+				"          country as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourcecities",
+				"sourceCustomer, sourcecities exists(City == cityname,",
+				"     negate:false,",
+				"     broadcast: 'auto')~> existsCity",
+				"existsCity sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['CustomersCities'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}
