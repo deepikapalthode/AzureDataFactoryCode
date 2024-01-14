@@ -1,0 +1,119 @@
+{
+	"name": "dataflowFlowLetDemo",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "AzureBlobStorage1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sourceEmployee"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "AzureBlobStorage1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "flowlet1",
+					"flowlet": {
+						"referenceName": "flowletRemoveDuplicates",
+						"type": "DataFlowReference"
+					}
+				},
+				{
+					"name": "derivedColumnDummy"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmployeeID as short,",
+				"          Name as string,",
+				"          Role as string,",
+				"          Salary as float,",
+				"          City as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     container: 'input',",
+				"     fileName: 'Employees.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> sourceEmployee",
+				"derivedColumnDummy compose(mapColumn(",
+				"          employeeID = EmployeeID,",
+				"          empName = Name,",
+				"          empRole = Role,",
+				"          empSalary = Salary,",
+				"          empCity = City,",
+				"          country = dummyCountry,",
+				"          population = dummyPopluation",
+				"     ),",
+				"     composition: 'flowletRemoveDuplicates') ~> flowlet1@(output1)",
+				"sourceEmployee derive(dummyCountry = 'country',",
+				"          dummyPopluation = 'population') ~> derivedColumnDummy",
+				"flowlet1@output1 select(mapColumn(",
+				"          employeeID,",
+				"          empName,",
+				"          empRole,",
+				"          empSalary,",
+				"          empCity",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          adult as string,",
+				"          belongs_to_collection as string,",
+				"          budget as string,",
+				"          genres as string,",
+				"          homepage as string,",
+				"          id as string,",
+				"          imdb_id as string,",
+				"          original_language as string,",
+				"          original_title as string,",
+				"          overview as string,",
+				"          popularity as string,",
+				"          poster_path as string,",
+				"          production_companies as string,",
+				"          production_countries as string,",
+				"          release_date as string,",
+				"          revenue as string,",
+				"          runtime as string,",
+				"          spoken_languages as string,",
+				"          status as string,",
+				"          tagline as string,",
+				"          title as string,",
+				"          video as string,",
+				"          vote_average as string,",
+				"          vote_count as string,",
+				"          {_c24} as string",
+				"     ),",
+				"     format: 'delimited',",
+				"     container: 'output2',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true,",
+				"     partitionFileNames:['UniqueEmployee'],",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}
