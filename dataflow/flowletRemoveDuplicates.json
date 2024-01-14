@@ -11,6 +11,9 @@
 				},
 				{
 					"name": "input1"
+				},
+				{
+					"name": "output1"
 				}
 			],
 			"scriptLines": [
@@ -34,7 +37,17 @@
 				"          country,",
 				"          city,",
 				"          population),",
-				"     count = count()) ~> aggregate1"
+				"     count = count()) ~> aggregate1",
+				"aggregate1 output(mapColumn(",
+				"          employeeID,",
+				"          empName,",
+				"          empRole,",
+				"          empSalary,",
+				"          empCity,",
+				"          country,",
+				"          city,",
+				"          population",
+				"     )) ~> output1"
 			]
 		}
 	}
