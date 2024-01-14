@@ -18,10 +18,10 @@
 			],
 			"scriptLines": [
 				"input(output(",
-				"          employeeID as string,",
+				"          employeeID as integer,",
 				"          empName as string,",
 				"          empRole as string,",
-				"          empSalary as string,",
+				"          empSalary as float,",
 				"          empCity as string,",
 				"          country as string,",
 				"          population as string",
@@ -43,7 +43,6 @@
 				"          empSalary,",
 				"          empCity,",
 				"          country,",
-				"          city,",
 				"          population",
 				"     )) ~> output1"
 			]
