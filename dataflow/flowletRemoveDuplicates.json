@@ -1,0 +1,41 @@
+{
+	"name": "flowletRemoveDuplicates",
+	"properties": {
+		"type": "Flowlet",
+		"typeProperties": {
+			"sources": [],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "input1"
+				}
+			],
+			"scriptLines": [
+				"input(output(",
+				"          employeeID as string,",
+				"          empName as string,",
+				"          empRole as string,",
+				"          empSalary as string,",
+				"          empCity as string,",
+				"          country as string,",
+				"          city as string,",
+				"          population as string",
+				"     ),",
+				"     order: 0,",
+				"     allowSchemaDrift: true) ~> input1",
+				"input1 aggregate(groupBy(employeeID,",
+				"          empName,",
+				"          empRole,",
+				"          empSalary,",
+				"          empCity,",
+				"          country,",
+				"          city,",
+				"          population),",
+				"     count = count()) ~> aggregate1"
+			]
+		}
+	}
+}
