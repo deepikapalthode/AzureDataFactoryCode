@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "if exists(\nselect 1 from information_schema.tables where table_schema='dbo'\nand table_name='cities')\nprint 'yes'\nelse\nprint 'no'",
+							"value": "select table_name from information_schema.tables where table_schema='dbo'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
