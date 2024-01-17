@@ -1,0 +1,787 @@
+{
+	"name": "Jsoninput",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "jsoninput"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"BD": {
+					"type": "string"
+				},
+				"BE": {
+					"type": "string"
+				},
+				"BF": {
+					"type": "string"
+				},
+				"BG": {
+					"type": "string"
+				},
+				"BA": {
+					"type": "string"
+				},
+				"BB": {
+					"type": "string"
+				},
+				"WF": {
+					"type": "string"
+				},
+				"BL": {
+					"type": "string"
+				},
+				"BM": {
+					"type": "string"
+				},
+				"BN": {
+					"type": "string"
+				},
+				"BO": {
+					"type": "string"
+				},
+				"BH": {
+					"type": "string"
+				},
+				"BI": {
+					"type": "string"
+				},
+				"BJ": {
+					"type": "string"
+				},
+				"BT": {
+					"type": "string"
+				},
+				"JM": {
+					"type": "string"
+				},
+				"BV": {
+					"type": "string"
+				},
+				"BW": {
+					"type": "string"
+				},
+				"WS": {
+					"type": "string"
+				},
+				"BQ": {
+					"type": "string"
+				},
+				"BR": {
+					"type": "string"
+				},
+				"BS": {
+					"type": "string"
+				},
+				"JE": {
+					"type": "string"
+				},
+				"BY": {
+					"type": "string"
+				},
+				"BZ": {
+					"type": "string"
+				},
+				"RU": {
+					"type": "string"
+				},
+				"RW": {
+					"type": "string"
+				},
+				"RS": {
+					"type": "string"
+				},
+				"TL": {
+					"type": "string"
+				},
+				"RE": {
+					"type": "string"
+				},
+				"TM": {
+					"type": "string"
+				},
+				"TJ": {
+					"type": "string"
+				},
+				"RO": {
+					"type": "string"
+				},
+				"TK": {
+					"type": "string"
+				},
+				"GW": {
+					"type": "string"
+				},
+				"GU": {
+					"type": "string"
+				},
+				"GT": {
+					"type": "string"
+				},
+				"GS": {
+					"type": "string"
+				},
+				"GR": {
+					"type": "string"
+				},
+				"GQ": {
+					"type": "string"
+				},
+				"GP": {
+					"type": "string"
+				},
+				"JP": {
+					"type": "string"
+				},
+				"GY": {
+					"type": "string"
+				},
+				"GG": {
+					"type": "string"
+				},
+				"GF": {
+					"type": "string"
+				},
+				"GE": {
+					"type": "string"
+				},
+				"GD": {
+					"type": "string"
+				},
+				"GB": {
+					"type": "string"
+				},
+				"GA": {
+					"type": "string"
+				},
+				"SV": {
+					"type": "string"
+				},
+				"GN": {
+					"type": "string"
+				},
+				"GM": {
+					"type": "string"
+				},
+				"GL": {
+					"type": "string"
+				},
+				"GI": {
+					"type": "string"
+				},
+				"GH": {
+					"type": "string"
+				},
+				"OM": {
+					"type": "string"
+				},
+				"TN": {
+					"type": "string"
+				},
+				"JO": {
+					"type": "string"
+				},
+				"HR": {
+					"type": "string"
+				},
+				"HT": {
+					"type": "string"
+				},
+				"HU": {
+					"type": "string"
+				},
+				"HK": {
+					"type": "string"
+				},
+				"HN": {
+					"type": "string"
+				},
+				"HM": {
+					"type": "string"
+				},
+				"VE": {
+					"type": "string"
+				},
+				"PR": {
+					"type": "string"
+				},
+				"PS": {
+					"type": "string"
+				},
+				"PW": {
+					"type": "string"
+				},
+				"PT": {
+					"type": "string"
+				},
+				"SJ": {
+					"type": "string"
+				},
+				"PY": {
+					"type": "string"
+				},
+				"IQ": {
+					"type": "string"
+				},
+				"PA": {
+					"type": "string"
+				},
+				"PF": {
+					"type": "string"
+				},
+				"PG": {
+					"type": "string"
+				},
+				"PE": {
+					"type": "string"
+				},
+				"PK": {
+					"type": "string"
+				},
+				"PH": {
+					"type": "string"
+				},
+				"PN": {
+					"type": "string"
+				},
+				"PL": {
+					"type": "string"
+				},
+				"PM": {
+					"type": "string"
+				},
+				"ZM": {
+					"type": "string"
+				},
+				"EH": {
+					"type": "string"
+				},
+				"EE": {
+					"type": "string"
+				},
+				"EG": {
+					"type": "string"
+				},
+				"ZA": {
+					"type": "string"
+				},
+				"EC": {
+					"type": "string"
+				},
+				"IT": {
+					"type": "string"
+				},
+				"VN": {
+					"type": "string"
+				},
+				"SB": {
+					"type": "string"
+				},
+				"ET": {
+					"type": "string"
+				},
+				"SO": {
+					"type": "string"
+				},
+				"ZW": {
+					"type": "string"
+				},
+				"SA": {
+					"type": "string"
+				},
+				"ES": {
+					"type": "string"
+				},
+				"ER": {
+					"type": "string"
+				},
+				"ME": {
+					"type": "string"
+				},
+				"MD": {
+					"type": "string"
+				},
+				"MG": {
+					"type": "string"
+				},
+				"MF": {
+					"type": "string"
+				},
+				"MA": {
+					"type": "string"
+				},
+				"MC": {
+					"type": "string"
+				},
+				"UZ": {
+					"type": "string"
+				},
+				"MM": {
+					"type": "string"
+				},
+				"ML": {
+					"type": "string"
+				},
+				"MO": {
+					"type": "string"
+				},
+				"MN": {
+					"type": "string"
+				},
+				"MH": {
+					"type": "string"
+				},
+				"MK": {
+					"type": "string"
+				},
+				"MU": {
+					"type": "string"
+				},
+				"MT": {
+					"type": "string"
+				},
+				"MW": {
+					"type": "string"
+				},
+				"MV": {
+					"type": "string"
+				},
+				"MQ": {
+					"type": "string"
+				},
+				"MP": {
+					"type": "string"
+				},
+				"MS": {
+					"type": "string"
+				},
+				"MR": {
+					"type": "string"
+				},
+				"IM": {
+					"type": "string"
+				},
+				"UG": {
+					"type": "string"
+				},
+				"TZ": {
+					"type": "string"
+				},
+				"MY": {
+					"type": "string"
+				},
+				"MX": {
+					"type": "string"
+				},
+				"IL": {
+					"type": "string"
+				},
+				"FR": {
+					"type": "string"
+				},
+				"IO": {
+					"type": "string"
+				},
+				"SH": {
+					"type": "string"
+				},
+				"FI": {
+					"type": "string"
+				},
+				"FJ": {
+					"type": "string"
+				},
+				"FK": {
+					"type": "string"
+				},
+				"FM": {
+					"type": "string"
+				},
+				"FO": {
+					"type": "string"
+				},
+				"NI": {
+					"type": "string"
+				},
+				"NL": {
+					"type": "string"
+				},
+				"NO": {
+					"type": "string"
+				},
+				"NA": {
+					"type": "string"
+				},
+				"VU": {
+					"type": "string"
+				},
+				"NC": {
+					"type": "string"
+				},
+				"NE": {
+					"type": "string"
+				},
+				"NF": {
+					"type": "string"
+				},
+				"NG": {
+					"type": "string"
+				},
+				"NZ": {
+					"type": "string"
+				},
+				"NP": {
+					"type": "string"
+				},
+				"NR": {
+					"type": "string"
+				},
+				"NU": {
+					"type": "string"
+				},
+				"CK": {
+					"type": "string"
+				},
+				"XK": {
+					"type": "string"
+				},
+				"CI": {
+					"type": "string"
+				},
+				"CH": {
+					"type": "string"
+				},
+				"CO": {
+					"type": "string"
+				},
+				"CN": {
+					"type": "string"
+				},
+				"CM": {
+					"type": "string"
+				},
+				"CL": {
+					"type": "string"
+				},
+				"CC": {
+					"type": "string"
+				},
+				"CA": {
+					"type": "string"
+				},
+				"CG": {
+					"type": "string"
+				},
+				"CF": {
+					"type": "string"
+				},
+				"CD": {
+					"type": "string"
+				},
+				"CZ": {
+					"type": "string"
+				},
+				"CY": {
+					"type": "string"
+				},
+				"CX": {
+					"type": "string"
+				},
+				"CR": {
+					"type": "string"
+				},
+				"CW": {
+					"type": "string"
+				},
+				"CV": {
+					"type": "string"
+				},
+				"CU": {
+					"type": "string"
+				},
+				"SZ": {
+					"type": "string"
+				},
+				"SY": {
+					"type": "string"
+				},
+				"SX": {
+					"type": "string"
+				},
+				"KG": {
+					"type": "string"
+				},
+				"KE": {
+					"type": "string"
+				},
+				"SS": {
+					"type": "string"
+				},
+				"SR": {
+					"type": "string"
+				},
+				"KI": {
+					"type": "string"
+				},
+				"KH": {
+					"type": "string"
+				},
+				"KN": {
+					"type": "string"
+				},
+				"KM": {
+					"type": "string"
+				},
+				"ST": {
+					"type": "string"
+				},
+				"SK": {
+					"type": "string"
+				},
+				"KR": {
+					"type": "string"
+				},
+				"SI": {
+					"type": "string"
+				},
+				"KP": {
+					"type": "string"
+				},
+				"KW": {
+					"type": "string"
+				},
+				"SN": {
+					"type": "string"
+				},
+				"SM": {
+					"type": "string"
+				},
+				"SL": {
+					"type": "string"
+				},
+				"SC": {
+					"type": "string"
+				},
+				"KZ": {
+					"type": "string"
+				},
+				"KY": {
+					"type": "string"
+				},
+				"SG": {
+					"type": "string"
+				},
+				"SE": {
+					"type": "string"
+				},
+				"SD": {
+					"type": "string"
+				},
+				"DO": {
+					"type": "string"
+				},
+				"DM": {
+					"type": "string"
+				},
+				"DJ": {
+					"type": "string"
+				},
+				"DK": {
+					"type": "string"
+				},
+				"VG": {
+					"type": "string"
+				},
+				"DE": {
+					"type": "string"
+				},
+				"YE": {
+					"type": "string"
+				},
+				"DZ": {
+					"type": "string"
+				},
+				"US": {
+					"type": "string"
+				},
+				"UY": {
+					"type": "string"
+				},
+				"YT": {
+					"type": "string"
+				},
+				"UM": {
+					"type": "string"
+				},
+				"LB": {
+					"type": "string"
+				},
+				"LC": {
+					"type": "string"
+				},
+				"LA": {
+					"type": "string"
+				},
+				"TV": {
+					"type": "string"
+				},
+				"TW": {
+					"type": "string"
+				},
+				"TT": {
+					"type": "string"
+				},
+				"TR": {
+					"type": "string"
+				},
+				"LK": {
+					"type": "string"
+				},
+				"LI": {
+					"type": "string"
+				},
+				"LV": {
+					"type": "string"
+				},
+				"TO": {
+					"type": "string"
+				},
+				"LT": {
+					"type": "string"
+				},
+				"LU": {
+					"type": "string"
+				},
+				"LR": {
+					"type": "string"
+				},
+				"LS": {
+					"type": "string"
+				},
+				"TH": {
+					"type": "string"
+				},
+				"TF": {
+					"type": "string"
+				},
+				"TG": {
+					"type": "string"
+				},
+				"TD": {
+					"type": "string"
+				},
+				"TC": {
+					"type": "string"
+				},
+				"LY": {
+					"type": "string"
+				},
+				"VA": {
+					"type": "string"
+				},
+				"VC": {
+					"type": "string"
+				},
+				"AE": {
+					"type": "string"
+				},
+				"AD": {
+					"type": "string"
+				},
+				"AG": {
+					"type": "string"
+				},
+				"AF": {
+					"type": "string"
+				},
+				"AI": {
+					"type": "string"
+				},
+				"VI": {
+					"type": "string"
+				},
+				"IS": {
+					"type": "string"
+				},
+				"IR": {
+					"type": "string"
+				},
+				"AM": {
+					"type": "string"
+				},
+				"AL": {
+					"type": "string"
+				},
+				"AO": {
+					"type": "string"
+				},
+				"AQ": {
+					"type": "string"
+				},
+				"AS": {
+					"type": "string"
+				},
+				"AR": {
+					"type": "string"
+				},
+				"AU": {
+					"type": "string"
+				},
+				"AT": {
+					"type": "string"
+				},
+				"AW": {
+					"type": "string"
+				},
+				"IN": {
+					"type": "string"
+				},
+				"AX": {
+					"type": "string"
+				},
+				"AZ": {
+					"type": "string"
+				},
+				"IE": {
+					"type": "string"
+				},
+				"ID": {
+					"type": "string"
+				},
+				"UA": {
+					"type": "string"
+				},
+				"QA": {
+					"type": "string"
+				},
+				"MZ": {
+					"type": "string"
+				},
+				"sepalLength": {
+					"type": "number"
+				},
+				"sepalWidth": {
+					"type": "number"
+				},
+				"petalLength": {
+					"type": "number"
+				},
+				"petalWidth": {
+					"type": "number"
+				},
+				"species": {
+					"type": "string"
+				}
+			}
+		}
+	}
+}
