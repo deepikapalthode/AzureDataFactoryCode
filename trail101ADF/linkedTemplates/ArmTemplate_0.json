@@ -335,14 +335,56 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipelineJoinDemo')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/flowletRemoveDuplicates')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
+				"type": "Flowlet",
+				"typeProperties": {
+					"sources": [],
+					"sinks": [],
+					"transformations": [
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "input1"
+						},
+						{
+							"name": "output1"
+						}
+					],
+					"scriptLines": [
+						"input(output(",
+						"          employeeID as integer,",
+						"          empName as string,",
+						"          empRole as string,",
+						"          empSalary as float,",
+						"          empCity as string,",
+						"          country as string,",
+						"          population as string",
+						"     ),",
+						"     order: 0,",
+						"     allowSchemaDrift: true) ~> input1",
+						"input1 aggregate(groupBy(employeeID,",
+						"          empName,",
+						"          empRole,",
+						"          empSalary,",
+						"          empCity,",
+						"          country,",
+						"          population),",
+						"     count = count()) ~> aggregate1",
+						"aggregate1 output(mapColumn(",
+						"          employeeID,",
+						"          empName,",
+						"          empRole,",
+						"          empSalary,",
+						"          empCity,",
+						"          country,",
+						"          population",
+						"     )) ~> output1"
+					]
+				}
 			},
 			"dependsOn": []
 		},
