@@ -1,0 +1,37 @@
+{
+	"name": "pipelineCopyMultipleTablesToBlob",
+	"properties": {
+		"activities": [
+			{
+				"name": "LookupTableExists",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "if exists(\nselect 1 from information_schema.tables where table_schema='dbo'\nand table_name='cities')\nprint 'yes'\nelse\nprint 'no'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSql",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"annotations": []
+	}
+}
