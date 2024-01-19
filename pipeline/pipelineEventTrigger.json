@@ -50,7 +50,17 @@
 				"inputs": [
 					{
 						"referenceName": "eventcsv",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"containername": {
+								"value": "@pipeline().parameters.ppcontainer",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@pipeline().parameters.ppfile",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
