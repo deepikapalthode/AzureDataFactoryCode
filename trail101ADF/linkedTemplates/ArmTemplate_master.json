@@ -11,6 +11,11 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
 		},
+		"AzureSqlDatabaseKV_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseKV'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=trail-db-server.database.windows.net;Initial Catalog=db1;User ID=serveradmin"
+		},
 		"LS_AzureSqlDatabase_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_AzureSqlDatabase'"
@@ -22,6 +27,30 @@
 		"sql_ls_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'sql_ls'"
+		},
+		"AzSqlDbKV02_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "dbsqlcs2"
+		},
+		"AzureBlobStoragekV_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "blobcs"
+		},
+		"AzureKeyVaultLS_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://trailazurekeeyvault.vault.azure.net/"
+		},
+		"eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer": {
+			"type": "string",
+			"defaultValue": "@triggerbody().folderpath"
+		},
+		"eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile": {
+			"type": "string",
+			"defaultValue": "@triggerbody().filename"
+		},
+		"eventtrigger01_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
 		"containerUri": {
 			"type": "string",
@@ -61,6 +90,9 @@
 					},
 					"sql_ls_connectionString": {
 						"value": "[parameters('sql_ls_connectionString')]"
+					},
+					"AzureKeyVaultLS_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AzureKeyVaultLS_properties_typeProperties_baseUrl')]"
 					}
 				}
 			},
@@ -99,11 +131,49 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"AzureSqlDatabaseKV_connectionString": {
+						"value": "[parameters('AzureSqlDatabaseKV_connectionString')]"
+					},
+					"AzSqlDbKV02_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('AzSqlDbKV02_properties_typeProperties_connectionString_secretName')]"
+					},
+					"AzureBlobStoragekV_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('AzureBlobStoragekV_properties_typeProperties_connectionString_secretName')]"
 					}
 				}
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'trail101ADF_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "trail101ADF_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer": {
+						"value": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer')]"
+					},
+					"eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile": {
+						"value": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile')]"
+					},
+					"eventtrigger01_properties_typeProperties_scope": {
+						"value": "[parameters('eventtrigger01_properties_typeProperties_scope')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'trail101ADF_ArmTemplate_2')]"
 			]
 		}
 	]

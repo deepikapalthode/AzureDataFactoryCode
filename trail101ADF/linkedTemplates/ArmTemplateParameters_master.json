@@ -8,6 +8,9 @@
 		"AzureBlobStorage1_connectionString": {
 			"value": ""
 		},
+		"AzureSqlDatabaseKV_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=trail-db-server.database.windows.net;Initial Catalog=db1;User ID=serveradmin"
+		},
 		"LS_AzureSqlDatabase_connectionString": {
 			"value": ""
 		},
@@ -16,6 +19,24 @@
 		},
 		"sql_ls_connectionString": {
 			"value": ""
+		},
+		"AzSqlDbKV02_properties_typeProperties_connectionString_secretName": {
+			"value": "dbsqlcs2"
+		},
+		"AzureBlobStoragekV_properties_typeProperties_connectionString_secretName": {
+			"value": "blobcs"
+		},
+		"AzureKeyVaultLS_properties_typeProperties_baseUrl": {
+			"value": "https://trailazurekeeyvault.vault.azure.net/"
+		},
+		"eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer": {
+			"value": "@triggerbody().folderpath"
+		},
+		"eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile": {
+			"value": "@triggerbody().filename"
+		},
+		"eventtrigger01_properties_typeProperties_scope": {
+			"value": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
 		"containerUri": {
 			"value": ""

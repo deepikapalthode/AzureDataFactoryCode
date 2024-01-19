@@ -11,6 +11,11 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
 		},
+		"AzureSqlDatabaseKV_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabaseKV'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=trail-db-server.database.windows.net;Initial Catalog=db1;User ID=serveradmin"
+		},
 		"LS_AzureSqlDatabase_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LS_AzureSqlDatabase'"
@@ -22,6 +27,30 @@
 		"sql_ls_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'sql_ls'"
+		},
+		"AzSqlDbKV02_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "dbsqlcs2"
+		},
+		"AzureBlobStoragekV_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "blobcs"
+		},
+		"AzureKeyVaultLS_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://trailazurekeeyvault.vault.azure.net/"
+		},
+		"eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer": {
+			"type": "string",
+			"defaultValue": "@triggerbody().folderpath"
+		},
+		"eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile": {
+			"type": "string",
+			"defaultValue": "@triggerbody().filename"
+		},
+		"eventtrigger01_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		}
 	},
 	"variables": {
@@ -523,6 +552,75 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipelineCopyBehaviour')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings",
+									"copyBehavior": "MergeFiles"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "Jsoninput",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "JsonOutput",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Jsoninput')]",
+				"[concat(variables('factoryId'), '/datasets/JsonOutput')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pipelineCopyDemo')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -614,6 +712,140 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DSmoviesCSV')]",
 				"[concat(variables('factoryId'), '/datasets/DScsvOut11')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipelineCopyMultipleTablesToBlob')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupTableExists",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select table_name from information_schema.tables where table_schema='dbo'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSql",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachTable",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupTableExists",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupTableExists').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Copy tables",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings",
+												"copyBehavior": "PreserveHierarchy"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "AzureSqlTables",
+											"type": "DatasetReference",
+											"parameters": {
+												"schemaname": {
+													"value": "@string('dbo')",
+													"type": "Expression"
+												},
+												"tablename": {
+													"value": "@item().table_name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Tables",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSql')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlTables')]",
+				"[concat(variables('factoryId'), '/datasets/Tables')]"
 			]
 		},
 		{
@@ -1149,6 +1381,109 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipelineLogicApps')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSqlDB",
+								"type": "DatasetReference",
+								"parameters": {
+									"schemaname": {
+										"value": "@pipeline().parameters.ppschemaname",
+										"type": "Expression"
+									},
+									"tablename": {
+										"value": "@pipeline().parameters.pptablename",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "sqlToBlob",
+								"type": "DatasetReference",
+								"parameters": {
+									"containername": {
+										"value": "@pipeline().parameters.ppcontainername",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@pipeline().parameters.ppfilename",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"ppschemaname": {
+						"type": "string"
+					},
+					"pptablename": {
+						"type": "string"
+					},
+					"ppcontainername": {
+						"type": "string"
+					},
+					"ppfilename": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSqlDB')]",
+				"[concat(variables('factoryId'), '/datasets/sqlToBlob')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pipelineLookupDemo')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1521,6 +1856,112 @@
 				"annotations": []
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Advertisement')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSql')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDB')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"schemaname": {
+						"type": "string"
+					},
+					"tablename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schemaname",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tablename",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlTables')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"schemaname": {
+						"type": "string"
+					},
+					"tablename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schemaname",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tablename",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSqlDatabase')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DSblobsink')]",
@@ -1908,6 +2349,1599 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/JsonContinent')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "continent.json",
+						"container": "jsoninput"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"BD": {
+							"type": "string"
+						},
+						"BE": {
+							"type": "string"
+						},
+						"BF": {
+							"type": "string"
+						},
+						"BG": {
+							"type": "string"
+						},
+						"BA": {
+							"type": "string"
+						},
+						"BB": {
+							"type": "string"
+						},
+						"WF": {
+							"type": "string"
+						},
+						"BL": {
+							"type": "string"
+						},
+						"BM": {
+							"type": "string"
+						},
+						"BN": {
+							"type": "string"
+						},
+						"BO": {
+							"type": "string"
+						},
+						"BH": {
+							"type": "string"
+						},
+						"BI": {
+							"type": "string"
+						},
+						"BJ": {
+							"type": "string"
+						},
+						"BT": {
+							"type": "string"
+						},
+						"JM": {
+							"type": "string"
+						},
+						"BV": {
+							"type": "string"
+						},
+						"BW": {
+							"type": "string"
+						},
+						"WS": {
+							"type": "string"
+						},
+						"BQ": {
+							"type": "string"
+						},
+						"BR": {
+							"type": "string"
+						},
+						"BS": {
+							"type": "string"
+						},
+						"JE": {
+							"type": "string"
+						},
+						"BY": {
+							"type": "string"
+						},
+						"BZ": {
+							"type": "string"
+						},
+						"RU": {
+							"type": "string"
+						},
+						"RW": {
+							"type": "string"
+						},
+						"RS": {
+							"type": "string"
+						},
+						"TL": {
+							"type": "string"
+						},
+						"RE": {
+							"type": "string"
+						},
+						"TM": {
+							"type": "string"
+						},
+						"TJ": {
+							"type": "string"
+						},
+						"RO": {
+							"type": "string"
+						},
+						"TK": {
+							"type": "string"
+						},
+						"GW": {
+							"type": "string"
+						},
+						"GU": {
+							"type": "string"
+						},
+						"GT": {
+							"type": "string"
+						},
+						"GS": {
+							"type": "string"
+						},
+						"GR": {
+							"type": "string"
+						},
+						"GQ": {
+							"type": "string"
+						},
+						"GP": {
+							"type": "string"
+						},
+						"JP": {
+							"type": "string"
+						},
+						"GY": {
+							"type": "string"
+						},
+						"GG": {
+							"type": "string"
+						},
+						"GF": {
+							"type": "string"
+						},
+						"GE": {
+							"type": "string"
+						},
+						"GD": {
+							"type": "string"
+						},
+						"GB": {
+							"type": "string"
+						},
+						"GA": {
+							"type": "string"
+						},
+						"SV": {
+							"type": "string"
+						},
+						"GN": {
+							"type": "string"
+						},
+						"GM": {
+							"type": "string"
+						},
+						"GL": {
+							"type": "string"
+						},
+						"GI": {
+							"type": "string"
+						},
+						"GH": {
+							"type": "string"
+						},
+						"OM": {
+							"type": "string"
+						},
+						"TN": {
+							"type": "string"
+						},
+						"JO": {
+							"type": "string"
+						},
+						"HR": {
+							"type": "string"
+						},
+						"HT": {
+							"type": "string"
+						},
+						"HU": {
+							"type": "string"
+						},
+						"HK": {
+							"type": "string"
+						},
+						"HN": {
+							"type": "string"
+						},
+						"HM": {
+							"type": "string"
+						},
+						"VE": {
+							"type": "string"
+						},
+						"PR": {
+							"type": "string"
+						},
+						"PS": {
+							"type": "string"
+						},
+						"PW": {
+							"type": "string"
+						},
+						"PT": {
+							"type": "string"
+						},
+						"SJ": {
+							"type": "string"
+						},
+						"PY": {
+							"type": "string"
+						},
+						"IQ": {
+							"type": "string"
+						},
+						"PA": {
+							"type": "string"
+						},
+						"PF": {
+							"type": "string"
+						},
+						"PG": {
+							"type": "string"
+						},
+						"PE": {
+							"type": "string"
+						},
+						"PK": {
+							"type": "string"
+						},
+						"PH": {
+							"type": "string"
+						},
+						"PN": {
+							"type": "string"
+						},
+						"PL": {
+							"type": "string"
+						},
+						"PM": {
+							"type": "string"
+						},
+						"ZM": {
+							"type": "string"
+						},
+						"EH": {
+							"type": "string"
+						},
+						"EE": {
+							"type": "string"
+						},
+						"EG": {
+							"type": "string"
+						},
+						"ZA": {
+							"type": "string"
+						},
+						"EC": {
+							"type": "string"
+						},
+						"IT": {
+							"type": "string"
+						},
+						"VN": {
+							"type": "string"
+						},
+						"SB": {
+							"type": "string"
+						},
+						"ET": {
+							"type": "string"
+						},
+						"SO": {
+							"type": "string"
+						},
+						"ZW": {
+							"type": "string"
+						},
+						"SA": {
+							"type": "string"
+						},
+						"ES": {
+							"type": "string"
+						},
+						"ER": {
+							"type": "string"
+						},
+						"ME": {
+							"type": "string"
+						},
+						"MD": {
+							"type": "string"
+						},
+						"MG": {
+							"type": "string"
+						},
+						"MF": {
+							"type": "string"
+						},
+						"MA": {
+							"type": "string"
+						},
+						"MC": {
+							"type": "string"
+						},
+						"UZ": {
+							"type": "string"
+						},
+						"MM": {
+							"type": "string"
+						},
+						"ML": {
+							"type": "string"
+						},
+						"MO": {
+							"type": "string"
+						},
+						"MN": {
+							"type": "string"
+						},
+						"MH": {
+							"type": "string"
+						},
+						"MK": {
+							"type": "string"
+						},
+						"MU": {
+							"type": "string"
+						},
+						"MT": {
+							"type": "string"
+						},
+						"MW": {
+							"type": "string"
+						},
+						"MV": {
+							"type": "string"
+						},
+						"MQ": {
+							"type": "string"
+						},
+						"MP": {
+							"type": "string"
+						},
+						"MS": {
+							"type": "string"
+						},
+						"MR": {
+							"type": "string"
+						},
+						"IM": {
+							"type": "string"
+						},
+						"UG": {
+							"type": "string"
+						},
+						"TZ": {
+							"type": "string"
+						},
+						"MY": {
+							"type": "string"
+						},
+						"MX": {
+							"type": "string"
+						},
+						"IL": {
+							"type": "string"
+						},
+						"FR": {
+							"type": "string"
+						},
+						"IO": {
+							"type": "string"
+						},
+						"SH": {
+							"type": "string"
+						},
+						"FI": {
+							"type": "string"
+						},
+						"FJ": {
+							"type": "string"
+						},
+						"FK": {
+							"type": "string"
+						},
+						"FM": {
+							"type": "string"
+						},
+						"FO": {
+							"type": "string"
+						},
+						"NI": {
+							"type": "string"
+						},
+						"NL": {
+							"type": "string"
+						},
+						"NO": {
+							"type": "string"
+						},
+						"NA": {
+							"type": "string"
+						},
+						"VU": {
+							"type": "string"
+						},
+						"NC": {
+							"type": "string"
+						},
+						"NE": {
+							"type": "string"
+						},
+						"NF": {
+							"type": "string"
+						},
+						"NG": {
+							"type": "string"
+						},
+						"NZ": {
+							"type": "string"
+						},
+						"NP": {
+							"type": "string"
+						},
+						"NR": {
+							"type": "string"
+						},
+						"NU": {
+							"type": "string"
+						},
+						"CK": {
+							"type": "string"
+						},
+						"XK": {
+							"type": "string"
+						},
+						"CI": {
+							"type": "string"
+						},
+						"CH": {
+							"type": "string"
+						},
+						"CO": {
+							"type": "string"
+						},
+						"CN": {
+							"type": "string"
+						},
+						"CM": {
+							"type": "string"
+						},
+						"CL": {
+							"type": "string"
+						},
+						"CC": {
+							"type": "string"
+						},
+						"CA": {
+							"type": "string"
+						},
+						"CG": {
+							"type": "string"
+						},
+						"CF": {
+							"type": "string"
+						},
+						"CD": {
+							"type": "string"
+						},
+						"CZ": {
+							"type": "string"
+						},
+						"CY": {
+							"type": "string"
+						},
+						"CX": {
+							"type": "string"
+						},
+						"CR": {
+							"type": "string"
+						},
+						"CW": {
+							"type": "string"
+						},
+						"CV": {
+							"type": "string"
+						},
+						"CU": {
+							"type": "string"
+						},
+						"SZ": {
+							"type": "string"
+						},
+						"SY": {
+							"type": "string"
+						},
+						"SX": {
+							"type": "string"
+						},
+						"KG": {
+							"type": "string"
+						},
+						"KE": {
+							"type": "string"
+						},
+						"SS": {
+							"type": "string"
+						},
+						"SR": {
+							"type": "string"
+						},
+						"KI": {
+							"type": "string"
+						},
+						"KH": {
+							"type": "string"
+						},
+						"KN": {
+							"type": "string"
+						},
+						"KM": {
+							"type": "string"
+						},
+						"ST": {
+							"type": "string"
+						},
+						"SK": {
+							"type": "string"
+						},
+						"KR": {
+							"type": "string"
+						},
+						"SI": {
+							"type": "string"
+						},
+						"KP": {
+							"type": "string"
+						},
+						"KW": {
+							"type": "string"
+						},
+						"SN": {
+							"type": "string"
+						},
+						"SM": {
+							"type": "string"
+						},
+						"SL": {
+							"type": "string"
+						},
+						"SC": {
+							"type": "string"
+						},
+						"KZ": {
+							"type": "string"
+						},
+						"KY": {
+							"type": "string"
+						},
+						"SG": {
+							"type": "string"
+						},
+						"SE": {
+							"type": "string"
+						},
+						"SD": {
+							"type": "string"
+						},
+						"DO": {
+							"type": "string"
+						},
+						"DM": {
+							"type": "string"
+						},
+						"DJ": {
+							"type": "string"
+						},
+						"DK": {
+							"type": "string"
+						},
+						"VG": {
+							"type": "string"
+						},
+						"DE": {
+							"type": "string"
+						},
+						"YE": {
+							"type": "string"
+						},
+						"DZ": {
+							"type": "string"
+						},
+						"US": {
+							"type": "string"
+						},
+						"UY": {
+							"type": "string"
+						},
+						"YT": {
+							"type": "string"
+						},
+						"UM": {
+							"type": "string"
+						},
+						"LB": {
+							"type": "string"
+						},
+						"LC": {
+							"type": "string"
+						},
+						"LA": {
+							"type": "string"
+						},
+						"TV": {
+							"type": "string"
+						},
+						"TW": {
+							"type": "string"
+						},
+						"TT": {
+							"type": "string"
+						},
+						"TR": {
+							"type": "string"
+						},
+						"LK": {
+							"type": "string"
+						},
+						"LI": {
+							"type": "string"
+						},
+						"LV": {
+							"type": "string"
+						},
+						"TO": {
+							"type": "string"
+						},
+						"LT": {
+							"type": "string"
+						},
+						"LU": {
+							"type": "string"
+						},
+						"LR": {
+							"type": "string"
+						},
+						"LS": {
+							"type": "string"
+						},
+						"TH": {
+							"type": "string"
+						},
+						"TF": {
+							"type": "string"
+						},
+						"TG": {
+							"type": "string"
+						},
+						"TD": {
+							"type": "string"
+						},
+						"TC": {
+							"type": "string"
+						},
+						"LY": {
+							"type": "string"
+						},
+						"VA": {
+							"type": "string"
+						},
+						"VC": {
+							"type": "string"
+						},
+						"AE": {
+							"type": "string"
+						},
+						"AD": {
+							"type": "string"
+						},
+						"AG": {
+							"type": "string"
+						},
+						"AF": {
+							"type": "string"
+						},
+						"AI": {
+							"type": "string"
+						},
+						"VI": {
+							"type": "string"
+						},
+						"IS": {
+							"type": "string"
+						},
+						"IR": {
+							"type": "string"
+						},
+						"AM": {
+							"type": "string"
+						},
+						"AL": {
+							"type": "string"
+						},
+						"AO": {
+							"type": "string"
+						},
+						"AQ": {
+							"type": "string"
+						},
+						"AS": {
+							"type": "string"
+						},
+						"AR": {
+							"type": "string"
+						},
+						"AU": {
+							"type": "string"
+						},
+						"AT": {
+							"type": "string"
+						},
+						"AW": {
+							"type": "string"
+						},
+						"IN": {
+							"type": "string"
+						},
+						"AX": {
+							"type": "string"
+						},
+						"AZ": {
+							"type": "string"
+						},
+						"IE": {
+							"type": "string"
+						},
+						"ID": {
+							"type": "string"
+						},
+						"UA": {
+							"type": "string"
+						},
+						"QA": {
+							"type": "string"
+						},
+						"MZ": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/JsonOutput')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "jsonoutput"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Jsoninput')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "jsoninput"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"BD": {
+							"type": "string"
+						},
+						"BE": {
+							"type": "string"
+						},
+						"BF": {
+							"type": "string"
+						},
+						"BG": {
+							"type": "string"
+						},
+						"BA": {
+							"type": "string"
+						},
+						"BB": {
+							"type": "string"
+						},
+						"WF": {
+							"type": "string"
+						},
+						"BL": {
+							"type": "string"
+						},
+						"BM": {
+							"type": "string"
+						},
+						"BN": {
+							"type": "string"
+						},
+						"BO": {
+							"type": "string"
+						},
+						"BH": {
+							"type": "string"
+						},
+						"BI": {
+							"type": "string"
+						},
+						"BJ": {
+							"type": "string"
+						},
+						"BT": {
+							"type": "string"
+						},
+						"JM": {
+							"type": "string"
+						},
+						"BV": {
+							"type": "string"
+						},
+						"BW": {
+							"type": "string"
+						},
+						"WS": {
+							"type": "string"
+						},
+						"BQ": {
+							"type": "string"
+						},
+						"BR": {
+							"type": "string"
+						},
+						"BS": {
+							"type": "string"
+						},
+						"JE": {
+							"type": "string"
+						},
+						"BY": {
+							"type": "string"
+						},
+						"BZ": {
+							"type": "string"
+						},
+						"RU": {
+							"type": "string"
+						},
+						"RW": {
+							"type": "string"
+						},
+						"RS": {
+							"type": "string"
+						},
+						"TL": {
+							"type": "string"
+						},
+						"RE": {
+							"type": "string"
+						},
+						"TM": {
+							"type": "string"
+						},
+						"TJ": {
+							"type": "string"
+						},
+						"RO": {
+							"type": "string"
+						},
+						"TK": {
+							"type": "string"
+						},
+						"GW": {
+							"type": "string"
+						},
+						"GU": {
+							"type": "string"
+						},
+						"GT": {
+							"type": "string"
+						},
+						"GS": {
+							"type": "string"
+						},
+						"GR": {
+							"type": "string"
+						},
+						"GQ": {
+							"type": "string"
+						},
+						"GP": {
+							"type": "string"
+						},
+						"JP": {
+							"type": "string"
+						},
+						"GY": {
+							"type": "string"
+						},
+						"GG": {
+							"type": "string"
+						},
+						"GF": {
+							"type": "string"
+						},
+						"GE": {
+							"type": "string"
+						},
+						"GD": {
+							"type": "string"
+						},
+						"GB": {
+							"type": "string"
+						},
+						"GA": {
+							"type": "string"
+						},
+						"SV": {
+							"type": "string"
+						},
+						"GN": {
+							"type": "string"
+						},
+						"GM": {
+							"type": "string"
+						},
+						"GL": {
+							"type": "string"
+						},
+						"GI": {
+							"type": "string"
+						},
+						"GH": {
+							"type": "string"
+						},
+						"OM": {
+							"type": "string"
+						},
+						"TN": {
+							"type": "string"
+						},
+						"JO": {
+							"type": "string"
+						},
+						"HR": {
+							"type": "string"
+						},
+						"HT": {
+							"type": "string"
+						},
+						"HU": {
+							"type": "string"
+						},
+						"HK": {
+							"type": "string"
+						},
+						"HN": {
+							"type": "string"
+						},
+						"HM": {
+							"type": "string"
+						},
+						"VE": {
+							"type": "string"
+						},
+						"PR": {
+							"type": "string"
+						},
+						"PS": {
+							"type": "string"
+						},
+						"PW": {
+							"type": "string"
+						},
+						"PT": {
+							"type": "string"
+						},
+						"SJ": {
+							"type": "string"
+						},
+						"PY": {
+							"type": "string"
+						},
+						"IQ": {
+							"type": "string"
+						},
+						"PA": {
+							"type": "string"
+						},
+						"PF": {
+							"type": "string"
+						},
+						"PG": {
+							"type": "string"
+						},
+						"PE": {
+							"type": "string"
+						},
+						"PK": {
+							"type": "string"
+						},
+						"PH": {
+							"type": "string"
+						},
+						"PN": {
+							"type": "string"
+						},
+						"PL": {
+							"type": "string"
+						},
+						"PM": {
+							"type": "string"
+						},
+						"ZM": {
+							"type": "string"
+						},
+						"EH": {
+							"type": "string"
+						},
+						"EE": {
+							"type": "string"
+						},
+						"EG": {
+							"type": "string"
+						},
+						"ZA": {
+							"type": "string"
+						},
+						"EC": {
+							"type": "string"
+						},
+						"IT": {
+							"type": "string"
+						},
+						"VN": {
+							"type": "string"
+						},
+						"SB": {
+							"type": "string"
+						},
+						"ET": {
+							"type": "string"
+						},
+						"SO": {
+							"type": "string"
+						},
+						"ZW": {
+							"type": "string"
+						},
+						"SA": {
+							"type": "string"
+						},
+						"ES": {
+							"type": "string"
+						},
+						"ER": {
+							"type": "string"
+						},
+						"ME": {
+							"type": "string"
+						},
+						"MD": {
+							"type": "string"
+						},
+						"MG": {
+							"type": "string"
+						},
+						"MF": {
+							"type": "string"
+						},
+						"MA": {
+							"type": "string"
+						},
+						"MC": {
+							"type": "string"
+						},
+						"UZ": {
+							"type": "string"
+						},
+						"MM": {
+							"type": "string"
+						},
+						"ML": {
+							"type": "string"
+						},
+						"MO": {
+							"type": "string"
+						},
+						"MN": {
+							"type": "string"
+						},
+						"MH": {
+							"type": "string"
+						},
+						"MK": {
+							"type": "string"
+						},
+						"MU": {
+							"type": "string"
+						},
+						"MT": {
+							"type": "string"
+						},
+						"MW": {
+							"type": "string"
+						},
+						"MV": {
+							"type": "string"
+						},
+						"MQ": {
+							"type": "string"
+						},
+						"MP": {
+							"type": "string"
+						},
+						"MS": {
+							"type": "string"
+						},
+						"MR": {
+							"type": "string"
+						},
+						"IM": {
+							"type": "string"
+						},
+						"UG": {
+							"type": "string"
+						},
+						"TZ": {
+							"type": "string"
+						},
+						"MY": {
+							"type": "string"
+						},
+						"MX": {
+							"type": "string"
+						},
+						"IL": {
+							"type": "string"
+						},
+						"FR": {
+							"type": "string"
+						},
+						"IO": {
+							"type": "string"
+						},
+						"SH": {
+							"type": "string"
+						},
+						"FI": {
+							"type": "string"
+						},
+						"FJ": {
+							"type": "string"
+						},
+						"FK": {
+							"type": "string"
+						},
+						"FM": {
+							"type": "string"
+						},
+						"FO": {
+							"type": "string"
+						},
+						"NI": {
+							"type": "string"
+						},
+						"NL": {
+							"type": "string"
+						},
+						"NO": {
+							"type": "string"
+						},
+						"NA": {
+							"type": "string"
+						},
+						"VU": {
+							"type": "string"
+						},
+						"NC": {
+							"type": "string"
+						},
+						"NE": {
+							"type": "string"
+						},
+						"NF": {
+							"type": "string"
+						},
+						"NG": {
+							"type": "string"
+						},
+						"NZ": {
+							"type": "string"
+						},
+						"NP": {
+							"type": "string"
+						},
+						"NR": {
+							"type": "string"
+						},
+						"NU": {
+							"type": "string"
+						},
+						"CK": {
+							"type": "string"
+						},
+						"XK": {
+							"type": "string"
+						},
+						"CI": {
+							"type": "string"
+						},
+						"CH": {
+							"type": "string"
+						},
+						"CO": {
+							"type": "string"
+						},
+						"CN": {
+							"type": "string"
+						},
+						"CM": {
+							"type": "string"
+						},
+						"CL": {
+							"type": "string"
+						},
+						"CC": {
+							"type": "string"
+						},
+						"CA": {
+							"type": "string"
+						},
+						"CG": {
+							"type": "string"
+						},
+						"CF": {
+							"type": "string"
+						},
+						"CD": {
+							"type": "string"
+						},
+						"CZ": {
+							"type": "string"
+						},
+						"CY": {
+							"type": "string"
+						},
+						"CX": {
+							"type": "string"
+						},
+						"CR": {
+							"type": "string"
+						},
+						"CW": {
+							"type": "string"
+						},
+						"CV": {
+							"type": "string"
+						},
+						"CU": {
+							"type": "string"
+						},
+						"SZ": {
+							"type": "string"
+						},
+						"SY": {
+							"type": "string"
+						},
+						"SX": {
+							"type": "string"
+						},
+						"KG": {
+							"type": "string"
+						},
+						"KE": {
+							"type": "string"
+						},
+						"SS": {
+							"type": "string"
+						},
+						"SR": {
+							"type": "string"
+						},
+						"KI": {
+							"type": "string"
+						},
+						"KH": {
+							"type": "string"
+						},
+						"KN": {
+							"type": "string"
+						},
+						"KM": {
+							"type": "string"
+						},
+						"ST": {
+							"type": "string"
+						},
+						"SK": {
+							"type": "string"
+						},
+						"KR": {
+							"type": "string"
+						},
+						"SI": {
+							"type": "string"
+						},
+						"KP": {
+							"type": "string"
+						},
+						"KW": {
+							"type": "string"
+						},
+						"SN": {
+							"type": "string"
+						},
+						"SM": {
+							"type": "string"
+						},
+						"SL": {
+							"type": "string"
+						},
+						"SC": {
+							"type": "string"
+						},
+						"KZ": {
+							"type": "string"
+						},
+						"KY": {
+							"type": "string"
+						},
+						"SG": {
+							"type": "string"
+						},
+						"SE": {
+							"type": "string"
+						},
+						"SD": {
+							"type": "string"
+						},
+						"DO": {
+							"type": "string"
+						},
+						"DM": {
+							"type": "string"
+						},
+						"DJ": {
+							"type": "string"
+						},
+						"DK": {
+							"type": "string"
+						},
+						"VG": {
+							"type": "string"
+						},
+						"DE": {
+							"type": "string"
+						},
+						"YE": {
+							"type": "string"
+						},
+						"DZ": {
+							"type": "string"
+						},
+						"US": {
+							"type": "string"
+						},
+						"UY": {
+							"type": "string"
+						},
+						"YT": {
+							"type": "string"
+						},
+						"UM": {
+							"type": "string"
+						},
+						"LB": {
+							"type": "string"
+						},
+						"LC": {
+							"type": "string"
+						},
+						"LA": {
+							"type": "string"
+						},
+						"TV": {
+							"type": "string"
+						},
+						"TW": {
+							"type": "string"
+						},
+						"TT": {
+							"type": "string"
+						},
+						"TR": {
+							"type": "string"
+						},
+						"LK": {
+							"type": "string"
+						},
+						"LI": {
+							"type": "string"
+						},
+						"LV": {
+							"type": "string"
+						},
+						"TO": {
+							"type": "string"
+						},
+						"LT": {
+							"type": "string"
+						},
+						"LU": {
+							"type": "string"
+						},
+						"LR": {
+							"type": "string"
+						},
+						"LS": {
+							"type": "string"
+						},
+						"TH": {
+							"type": "string"
+						},
+						"TF": {
+							"type": "string"
+						},
+						"TG": {
+							"type": "string"
+						},
+						"TD": {
+							"type": "string"
+						},
+						"TC": {
+							"type": "string"
+						},
+						"LY": {
+							"type": "string"
+						},
+						"VA": {
+							"type": "string"
+						},
+						"VC": {
+							"type": "string"
+						},
+						"AE": {
+							"type": "string"
+						},
+						"AD": {
+							"type": "string"
+						},
+						"AG": {
+							"type": "string"
+						},
+						"AF": {
+							"type": "string"
+						},
+						"AI": {
+							"type": "string"
+						},
+						"VI": {
+							"type": "string"
+						},
+						"IS": {
+							"type": "string"
+						},
+						"IR": {
+							"type": "string"
+						},
+						"AM": {
+							"type": "string"
+						},
+						"AL": {
+							"type": "string"
+						},
+						"AO": {
+							"type": "string"
+						},
+						"AQ": {
+							"type": "string"
+						},
+						"AS": {
+							"type": "string"
+						},
+						"AR": {
+							"type": "string"
+						},
+						"AU": {
+							"type": "string"
+						},
+						"AT": {
+							"type": "string"
+						},
+						"AW": {
+							"type": "string"
+						},
+						"IN": {
+							"type": "string"
+						},
+						"AX": {
+							"type": "string"
+						},
+						"AZ": {
+							"type": "string"
+						},
+						"IE": {
+							"type": "string"
+						},
+						"ID": {
+							"type": "string"
+						},
+						"UA": {
+							"type": "string"
+						},
+						"QA": {
+							"type": "string"
+						},
+						"MZ": {
+							"type": "string"
+						},
+						"sepalLength": {
+							"type": "number"
+						},
+						"sepalWidth": {
+							"type": "number"
+						},
+						"petalLength": {
+							"type": "number"
+						},
+						"petalWidth": {
+							"type": "number"
+						},
+						"species": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/OrdersTable')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1993,6 +4027,33 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Tables')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "output2"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		},
 		{
@@ -2468,6 +4529,48 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/sqlToBlob')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"containername": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().containername",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/sql_dataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -2525,6 +4628,28 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/AzSqlDbKV02')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVaultLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('AzSqlDbKV02_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVaultLS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -2536,6 +4661,64 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStoragekV')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVaultLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('AzureBlobStoragekV_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVaultLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureKeyVaultLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureKeyVaultLS_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabaseKV')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabaseKV_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVaultLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "sqlpassword"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVaultLS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_AzureSqlDatabase')]",
@@ -3384,7 +5567,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipelineCopyBehaviour')]",
+			"name": "[concat(parameters('factoryName'), '/pipelineEventTrigger')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -3403,39 +5586,56 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "JsonSource",
+								"type": "DelimitedTextSource",
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
-									"wildcardFileName": "*",
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
-									"type": "JsonReadSettings"
+									"type": "DelimitedTextReadSettings"
 								}
 							},
 							"sink": {
-								"type": "JsonSink",
+								"type": "DelimitedTextSink",
 								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings",
-									"copyBehavior": "PreserveHierarchy"
+									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "JsonWriteSettings"
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
 								}
 							},
-							"enableStaging": false
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
 						},
 						"inputs": [
 							{
-								"referenceName": "Jsoninput",
+								"referenceName": "eventcsv",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"containername": {
+										"value": "@pipeline().parameters.ppcontainer",
+										"type": "Expression"
+									},
+									"filename": {
+										"value": "@pipeline().parameters.ppfile",
+										"type": "Expression"
+									}
+								}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "JsonOutput",
+								"referenceName": "eventoutcsv",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -3445,1604 +5645,123 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"parameters": {
+					"ppcontainer": {
+						"type": "string"
+					},
+					"ppfile": {
+						"type": "string"
+					}
+				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Jsoninput')]",
-				"[concat(variables('factoryId'), '/datasets/JsonOutput')]"
+				"[concat(variables('factoryId'), '/datasets/eventcsv')]",
+				"[concat(variables('factoryId'), '/datasets/eventoutcsv')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/JsonContinent')]",
+			"name": "[concat(parameters('factoryName'), '/eventcsv')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
+					"referenceName": "AzureBlobStoragekV",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"containername": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
-				"type": "Json",
+				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": "continent.json",
-						"container": "jsoninput"
-					}
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().containername",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
 				},
-				"schema": {
-					"type": "object",
-					"properties": {
-						"BD": {
-							"type": "string"
-						},
-						"BE": {
-							"type": "string"
-						},
-						"BF": {
-							"type": "string"
-						},
-						"BG": {
-							"type": "string"
-						},
-						"BA": {
-							"type": "string"
-						},
-						"BB": {
-							"type": "string"
-						},
-						"WF": {
-							"type": "string"
-						},
-						"BL": {
-							"type": "string"
-						},
-						"BM": {
-							"type": "string"
-						},
-						"BN": {
-							"type": "string"
-						},
-						"BO": {
-							"type": "string"
-						},
-						"BH": {
-							"type": "string"
-						},
-						"BI": {
-							"type": "string"
-						},
-						"BJ": {
-							"type": "string"
-						},
-						"BT": {
-							"type": "string"
-						},
-						"JM": {
-							"type": "string"
-						},
-						"BV": {
-							"type": "string"
-						},
-						"BW": {
-							"type": "string"
-						},
-						"WS": {
-							"type": "string"
-						},
-						"BQ": {
-							"type": "string"
-						},
-						"BR": {
-							"type": "string"
-						},
-						"BS": {
-							"type": "string"
-						},
-						"JE": {
-							"type": "string"
-						},
-						"BY": {
-							"type": "string"
-						},
-						"BZ": {
-							"type": "string"
-						},
-						"RU": {
-							"type": "string"
-						},
-						"RW": {
-							"type": "string"
-						},
-						"RS": {
-							"type": "string"
-						},
-						"TL": {
-							"type": "string"
-						},
-						"RE": {
-							"type": "string"
-						},
-						"TM": {
-							"type": "string"
-						},
-						"TJ": {
-							"type": "string"
-						},
-						"RO": {
-							"type": "string"
-						},
-						"TK": {
-							"type": "string"
-						},
-						"GW": {
-							"type": "string"
-						},
-						"GU": {
-							"type": "string"
-						},
-						"GT": {
-							"type": "string"
-						},
-						"GS": {
-							"type": "string"
-						},
-						"GR": {
-							"type": "string"
-						},
-						"GQ": {
-							"type": "string"
-						},
-						"GP": {
-							"type": "string"
-						},
-						"JP": {
-							"type": "string"
-						},
-						"GY": {
-							"type": "string"
-						},
-						"GG": {
-							"type": "string"
-						},
-						"GF": {
-							"type": "string"
-						},
-						"GE": {
-							"type": "string"
-						},
-						"GD": {
-							"type": "string"
-						},
-						"GB": {
-							"type": "string"
-						},
-						"GA": {
-							"type": "string"
-						},
-						"SV": {
-							"type": "string"
-						},
-						"GN": {
-							"type": "string"
-						},
-						"GM": {
-							"type": "string"
-						},
-						"GL": {
-							"type": "string"
-						},
-						"GI": {
-							"type": "string"
-						},
-						"GH": {
-							"type": "string"
-						},
-						"OM": {
-							"type": "string"
-						},
-						"TN": {
-							"type": "string"
-						},
-						"JO": {
-							"type": "string"
-						},
-						"HR": {
-							"type": "string"
-						},
-						"HT": {
-							"type": "string"
-						},
-						"HU": {
-							"type": "string"
-						},
-						"HK": {
-							"type": "string"
-						},
-						"HN": {
-							"type": "string"
-						},
-						"HM": {
-							"type": "string"
-						},
-						"VE": {
-							"type": "string"
-						},
-						"PR": {
-							"type": "string"
-						},
-						"PS": {
-							"type": "string"
-						},
-						"PW": {
-							"type": "string"
-						},
-						"PT": {
-							"type": "string"
-						},
-						"SJ": {
-							"type": "string"
-						},
-						"PY": {
-							"type": "string"
-						},
-						"IQ": {
-							"type": "string"
-						},
-						"PA": {
-							"type": "string"
-						},
-						"PF": {
-							"type": "string"
-						},
-						"PG": {
-							"type": "string"
-						},
-						"PE": {
-							"type": "string"
-						},
-						"PK": {
-							"type": "string"
-						},
-						"PH": {
-							"type": "string"
-						},
-						"PN": {
-							"type": "string"
-						},
-						"PL": {
-							"type": "string"
-						},
-						"PM": {
-							"type": "string"
-						},
-						"ZM": {
-							"type": "string"
-						},
-						"EH": {
-							"type": "string"
-						},
-						"EE": {
-							"type": "string"
-						},
-						"EG": {
-							"type": "string"
-						},
-						"ZA": {
-							"type": "string"
-						},
-						"EC": {
-							"type": "string"
-						},
-						"IT": {
-							"type": "string"
-						},
-						"VN": {
-							"type": "string"
-						},
-						"SB": {
-							"type": "string"
-						},
-						"ET": {
-							"type": "string"
-						},
-						"SO": {
-							"type": "string"
-						},
-						"ZW": {
-							"type": "string"
-						},
-						"SA": {
-							"type": "string"
-						},
-						"ES": {
-							"type": "string"
-						},
-						"ER": {
-							"type": "string"
-						},
-						"ME": {
-							"type": "string"
-						},
-						"MD": {
-							"type": "string"
-						},
-						"MG": {
-							"type": "string"
-						},
-						"MF": {
-							"type": "string"
-						},
-						"MA": {
-							"type": "string"
-						},
-						"MC": {
-							"type": "string"
-						},
-						"UZ": {
-							"type": "string"
-						},
-						"MM": {
-							"type": "string"
-						},
-						"ML": {
-							"type": "string"
-						},
-						"MO": {
-							"type": "string"
-						},
-						"MN": {
-							"type": "string"
-						},
-						"MH": {
-							"type": "string"
-						},
-						"MK": {
-							"type": "string"
-						},
-						"MU": {
-							"type": "string"
-						},
-						"MT": {
-							"type": "string"
-						},
-						"MW": {
-							"type": "string"
-						},
-						"MV": {
-							"type": "string"
-						},
-						"MQ": {
-							"type": "string"
-						},
-						"MP": {
-							"type": "string"
-						},
-						"MS": {
-							"type": "string"
-						},
-						"MR": {
-							"type": "string"
-						},
-						"IM": {
-							"type": "string"
-						},
-						"UG": {
-							"type": "string"
-						},
-						"TZ": {
-							"type": "string"
-						},
-						"MY": {
-							"type": "string"
-						},
-						"MX": {
-							"type": "string"
-						},
-						"IL": {
-							"type": "string"
-						},
-						"FR": {
-							"type": "string"
-						},
-						"IO": {
-							"type": "string"
-						},
-						"SH": {
-							"type": "string"
-						},
-						"FI": {
-							"type": "string"
-						},
-						"FJ": {
-							"type": "string"
-						},
-						"FK": {
-							"type": "string"
-						},
-						"FM": {
-							"type": "string"
-						},
-						"FO": {
-							"type": "string"
-						},
-						"NI": {
-							"type": "string"
-						},
-						"NL": {
-							"type": "string"
-						},
-						"NO": {
-							"type": "string"
-						},
-						"NA": {
-							"type": "string"
-						},
-						"VU": {
-							"type": "string"
-						},
-						"NC": {
-							"type": "string"
-						},
-						"NE": {
-							"type": "string"
-						},
-						"NF": {
-							"type": "string"
-						},
-						"NG": {
-							"type": "string"
-						},
-						"NZ": {
-							"type": "string"
-						},
-						"NP": {
-							"type": "string"
-						},
-						"NR": {
-							"type": "string"
-						},
-						"NU": {
-							"type": "string"
-						},
-						"CK": {
-							"type": "string"
-						},
-						"XK": {
-							"type": "string"
-						},
-						"CI": {
-							"type": "string"
-						},
-						"CH": {
-							"type": "string"
-						},
-						"CO": {
-							"type": "string"
-						},
-						"CN": {
-							"type": "string"
-						},
-						"CM": {
-							"type": "string"
-						},
-						"CL": {
-							"type": "string"
-						},
-						"CC": {
-							"type": "string"
-						},
-						"CA": {
-							"type": "string"
-						},
-						"CG": {
-							"type": "string"
-						},
-						"CF": {
-							"type": "string"
-						},
-						"CD": {
-							"type": "string"
-						},
-						"CZ": {
-							"type": "string"
-						},
-						"CY": {
-							"type": "string"
-						},
-						"CX": {
-							"type": "string"
-						},
-						"CR": {
-							"type": "string"
-						},
-						"CW": {
-							"type": "string"
-						},
-						"CV": {
-							"type": "string"
-						},
-						"CU": {
-							"type": "string"
-						},
-						"SZ": {
-							"type": "string"
-						},
-						"SY": {
-							"type": "string"
-						},
-						"SX": {
-							"type": "string"
-						},
-						"KG": {
-							"type": "string"
-						},
-						"KE": {
-							"type": "string"
-						},
-						"SS": {
-							"type": "string"
-						},
-						"SR": {
-							"type": "string"
-						},
-						"KI": {
-							"type": "string"
-						},
-						"KH": {
-							"type": "string"
-						},
-						"KN": {
-							"type": "string"
-						},
-						"KM": {
-							"type": "string"
-						},
-						"ST": {
-							"type": "string"
-						},
-						"SK": {
-							"type": "string"
-						},
-						"KR": {
-							"type": "string"
-						},
-						"SI": {
-							"type": "string"
-						},
-						"KP": {
-							"type": "string"
-						},
-						"KW": {
-							"type": "string"
-						},
-						"SN": {
-							"type": "string"
-						},
-						"SM": {
-							"type": "string"
-						},
-						"SL": {
-							"type": "string"
-						},
-						"SC": {
-							"type": "string"
-						},
-						"KZ": {
-							"type": "string"
-						},
-						"KY": {
-							"type": "string"
-						},
-						"SG": {
-							"type": "string"
-						},
-						"SE": {
-							"type": "string"
-						},
-						"SD": {
-							"type": "string"
-						},
-						"DO": {
-							"type": "string"
-						},
-						"DM": {
-							"type": "string"
-						},
-						"DJ": {
-							"type": "string"
-						},
-						"DK": {
-							"type": "string"
-						},
-						"VG": {
-							"type": "string"
-						},
-						"DE": {
-							"type": "string"
-						},
-						"YE": {
-							"type": "string"
-						},
-						"DZ": {
-							"type": "string"
-						},
-						"US": {
-							"type": "string"
-						},
-						"UY": {
-							"type": "string"
-						},
-						"YT": {
-							"type": "string"
-						},
-						"UM": {
-							"type": "string"
-						},
-						"LB": {
-							"type": "string"
-						},
-						"LC": {
-							"type": "string"
-						},
-						"LA": {
-							"type": "string"
-						},
-						"TV": {
-							"type": "string"
-						},
-						"TW": {
-							"type": "string"
-						},
-						"TT": {
-							"type": "string"
-						},
-						"TR": {
-							"type": "string"
-						},
-						"LK": {
-							"type": "string"
-						},
-						"LI": {
-							"type": "string"
-						},
-						"LV": {
-							"type": "string"
-						},
-						"TO": {
-							"type": "string"
-						},
-						"LT": {
-							"type": "string"
-						},
-						"LU": {
-							"type": "string"
-						},
-						"LR": {
-							"type": "string"
-						},
-						"LS": {
-							"type": "string"
-						},
-						"TH": {
-							"type": "string"
-						},
-						"TF": {
-							"type": "string"
-						},
-						"TG": {
-							"type": "string"
-						},
-						"TD": {
-							"type": "string"
-						},
-						"TC": {
-							"type": "string"
-						},
-						"LY": {
-							"type": "string"
-						},
-						"VA": {
-							"type": "string"
-						},
-						"VC": {
-							"type": "string"
-						},
-						"AE": {
-							"type": "string"
-						},
-						"AD": {
-							"type": "string"
-						},
-						"AG": {
-							"type": "string"
-						},
-						"AF": {
-							"type": "string"
-						},
-						"AI": {
-							"type": "string"
-						},
-						"VI": {
-							"type": "string"
-						},
-						"IS": {
-							"type": "string"
-						},
-						"IR": {
-							"type": "string"
-						},
-						"AM": {
-							"type": "string"
-						},
-						"AL": {
-							"type": "string"
-						},
-						"AO": {
-							"type": "string"
-						},
-						"AQ": {
-							"type": "string"
-						},
-						"AS": {
-							"type": "string"
-						},
-						"AR": {
-							"type": "string"
-						},
-						"AU": {
-							"type": "string"
-						},
-						"AT": {
-							"type": "string"
-						},
-						"AW": {
-							"type": "string"
-						},
-						"IN": {
-							"type": "string"
-						},
-						"AX": {
-							"type": "string"
-						},
-						"AZ": {
-							"type": "string"
-						},
-						"IE": {
-							"type": "string"
-						},
-						"ID": {
-							"type": "string"
-						},
-						"UA": {
-							"type": "string"
-						},
-						"QA": {
-							"type": "string"
-						},
-						"MZ": {
-							"type": "string"
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStoragekV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/eventoutcsv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStoragekV",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "eventoutput"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStoragekV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/eventtrigger01')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pipelineEventTrigger",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"ppcontainer": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer')]",
+							"ppfile": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile')]"
 						}
 					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/eventinput/blobs/",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": false,
+					"scope": "[parameters('eventtrigger01_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated",
+						"Microsoft.Storage.BlobDeleted"
+					]
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Jsoninput')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": "jsoninput"
-					}
-				},
-				"schema": {
-					"type": "object",
-					"properties": {
-						"BD": {
-							"type": "string"
-						},
-						"BE": {
-							"type": "string"
-						},
-						"BF": {
-							"type": "string"
-						},
-						"BG": {
-							"type": "string"
-						},
-						"BA": {
-							"type": "string"
-						},
-						"BB": {
-							"type": "string"
-						},
-						"WF": {
-							"type": "string"
-						},
-						"BL": {
-							"type": "string"
-						},
-						"BM": {
-							"type": "string"
-						},
-						"BN": {
-							"type": "string"
-						},
-						"BO": {
-							"type": "string"
-						},
-						"BH": {
-							"type": "string"
-						},
-						"BI": {
-							"type": "string"
-						},
-						"BJ": {
-							"type": "string"
-						},
-						"BT": {
-							"type": "string"
-						},
-						"JM": {
-							"type": "string"
-						},
-						"BV": {
-							"type": "string"
-						},
-						"BW": {
-							"type": "string"
-						},
-						"WS": {
-							"type": "string"
-						},
-						"BQ": {
-							"type": "string"
-						},
-						"BR": {
-							"type": "string"
-						},
-						"BS": {
-							"type": "string"
-						},
-						"JE": {
-							"type": "string"
-						},
-						"BY": {
-							"type": "string"
-						},
-						"BZ": {
-							"type": "string"
-						},
-						"RU": {
-							"type": "string"
-						},
-						"RW": {
-							"type": "string"
-						},
-						"RS": {
-							"type": "string"
-						},
-						"TL": {
-							"type": "string"
-						},
-						"RE": {
-							"type": "string"
-						},
-						"TM": {
-							"type": "string"
-						},
-						"TJ": {
-							"type": "string"
-						},
-						"RO": {
-							"type": "string"
-						},
-						"TK": {
-							"type": "string"
-						},
-						"GW": {
-							"type": "string"
-						},
-						"GU": {
-							"type": "string"
-						},
-						"GT": {
-							"type": "string"
-						},
-						"GS": {
-							"type": "string"
-						},
-						"GR": {
-							"type": "string"
-						},
-						"GQ": {
-							"type": "string"
-						},
-						"GP": {
-							"type": "string"
-						},
-						"JP": {
-							"type": "string"
-						},
-						"GY": {
-							"type": "string"
-						},
-						"GG": {
-							"type": "string"
-						},
-						"GF": {
-							"type": "string"
-						},
-						"GE": {
-							"type": "string"
-						},
-						"GD": {
-							"type": "string"
-						},
-						"GB": {
-							"type": "string"
-						},
-						"GA": {
-							"type": "string"
-						},
-						"SV": {
-							"type": "string"
-						},
-						"GN": {
-							"type": "string"
-						},
-						"GM": {
-							"type": "string"
-						},
-						"GL": {
-							"type": "string"
-						},
-						"GI": {
-							"type": "string"
-						},
-						"GH": {
-							"type": "string"
-						},
-						"OM": {
-							"type": "string"
-						},
-						"TN": {
-							"type": "string"
-						},
-						"JO": {
-							"type": "string"
-						},
-						"HR": {
-							"type": "string"
-						},
-						"HT": {
-							"type": "string"
-						},
-						"HU": {
-							"type": "string"
-						},
-						"HK": {
-							"type": "string"
-						},
-						"HN": {
-							"type": "string"
-						},
-						"HM": {
-							"type": "string"
-						},
-						"VE": {
-							"type": "string"
-						},
-						"PR": {
-							"type": "string"
-						},
-						"PS": {
-							"type": "string"
-						},
-						"PW": {
-							"type": "string"
-						},
-						"PT": {
-							"type": "string"
-						},
-						"SJ": {
-							"type": "string"
-						},
-						"PY": {
-							"type": "string"
-						},
-						"IQ": {
-							"type": "string"
-						},
-						"PA": {
-							"type": "string"
-						},
-						"PF": {
-							"type": "string"
-						},
-						"PG": {
-							"type": "string"
-						},
-						"PE": {
-							"type": "string"
-						},
-						"PK": {
-							"type": "string"
-						},
-						"PH": {
-							"type": "string"
-						},
-						"PN": {
-							"type": "string"
-						},
-						"PL": {
-							"type": "string"
-						},
-						"PM": {
-							"type": "string"
-						},
-						"ZM": {
-							"type": "string"
-						},
-						"EH": {
-							"type": "string"
-						},
-						"EE": {
-							"type": "string"
-						},
-						"EG": {
-							"type": "string"
-						},
-						"ZA": {
-							"type": "string"
-						},
-						"EC": {
-							"type": "string"
-						},
-						"IT": {
-							"type": "string"
-						},
-						"VN": {
-							"type": "string"
-						},
-						"SB": {
-							"type": "string"
-						},
-						"ET": {
-							"type": "string"
-						},
-						"SO": {
-							"type": "string"
-						},
-						"ZW": {
-							"type": "string"
-						},
-						"SA": {
-							"type": "string"
-						},
-						"ES": {
-							"type": "string"
-						},
-						"ER": {
-							"type": "string"
-						},
-						"ME": {
-							"type": "string"
-						},
-						"MD": {
-							"type": "string"
-						},
-						"MG": {
-							"type": "string"
-						},
-						"MF": {
-							"type": "string"
-						},
-						"MA": {
-							"type": "string"
-						},
-						"MC": {
-							"type": "string"
-						},
-						"UZ": {
-							"type": "string"
-						},
-						"MM": {
-							"type": "string"
-						},
-						"ML": {
-							"type": "string"
-						},
-						"MO": {
-							"type": "string"
-						},
-						"MN": {
-							"type": "string"
-						},
-						"MH": {
-							"type": "string"
-						},
-						"MK": {
-							"type": "string"
-						},
-						"MU": {
-							"type": "string"
-						},
-						"MT": {
-							"type": "string"
-						},
-						"MW": {
-							"type": "string"
-						},
-						"MV": {
-							"type": "string"
-						},
-						"MQ": {
-							"type": "string"
-						},
-						"MP": {
-							"type": "string"
-						},
-						"MS": {
-							"type": "string"
-						},
-						"MR": {
-							"type": "string"
-						},
-						"IM": {
-							"type": "string"
-						},
-						"UG": {
-							"type": "string"
-						},
-						"TZ": {
-							"type": "string"
-						},
-						"MY": {
-							"type": "string"
-						},
-						"MX": {
-							"type": "string"
-						},
-						"IL": {
-							"type": "string"
-						},
-						"FR": {
-							"type": "string"
-						},
-						"IO": {
-							"type": "string"
-						},
-						"SH": {
-							"type": "string"
-						},
-						"FI": {
-							"type": "string"
-						},
-						"FJ": {
-							"type": "string"
-						},
-						"FK": {
-							"type": "string"
-						},
-						"FM": {
-							"type": "string"
-						},
-						"FO": {
-							"type": "string"
-						},
-						"NI": {
-							"type": "string"
-						},
-						"NL": {
-							"type": "string"
-						},
-						"NO": {
-							"type": "string"
-						},
-						"NA": {
-							"type": "string"
-						},
-						"VU": {
-							"type": "string"
-						},
-						"NC": {
-							"type": "string"
-						},
-						"NE": {
-							"type": "string"
-						},
-						"NF": {
-							"type": "string"
-						},
-						"NG": {
-							"type": "string"
-						},
-						"NZ": {
-							"type": "string"
-						},
-						"NP": {
-							"type": "string"
-						},
-						"NR": {
-							"type": "string"
-						},
-						"NU": {
-							"type": "string"
-						},
-						"CK": {
-							"type": "string"
-						},
-						"XK": {
-							"type": "string"
-						},
-						"CI": {
-							"type": "string"
-						},
-						"CH": {
-							"type": "string"
-						},
-						"CO": {
-							"type": "string"
-						},
-						"CN": {
-							"type": "string"
-						},
-						"CM": {
-							"type": "string"
-						},
-						"CL": {
-							"type": "string"
-						},
-						"CC": {
-							"type": "string"
-						},
-						"CA": {
-							"type": "string"
-						},
-						"CG": {
-							"type": "string"
-						},
-						"CF": {
-							"type": "string"
-						},
-						"CD": {
-							"type": "string"
-						},
-						"CZ": {
-							"type": "string"
-						},
-						"CY": {
-							"type": "string"
-						},
-						"CX": {
-							"type": "string"
-						},
-						"CR": {
-							"type": "string"
-						},
-						"CW": {
-							"type": "string"
-						},
-						"CV": {
-							"type": "string"
-						},
-						"CU": {
-							"type": "string"
-						},
-						"SZ": {
-							"type": "string"
-						},
-						"SY": {
-							"type": "string"
-						},
-						"SX": {
-							"type": "string"
-						},
-						"KG": {
-							"type": "string"
-						},
-						"KE": {
-							"type": "string"
-						},
-						"SS": {
-							"type": "string"
-						},
-						"SR": {
-							"type": "string"
-						},
-						"KI": {
-							"type": "string"
-						},
-						"KH": {
-							"type": "string"
-						},
-						"KN": {
-							"type": "string"
-						},
-						"KM": {
-							"type": "string"
-						},
-						"ST": {
-							"type": "string"
-						},
-						"SK": {
-							"type": "string"
-						},
-						"KR": {
-							"type": "string"
-						},
-						"SI": {
-							"type": "string"
-						},
-						"KP": {
-							"type": "string"
-						},
-						"KW": {
-							"type": "string"
-						},
-						"SN": {
-							"type": "string"
-						},
-						"SM": {
-							"type": "string"
-						},
-						"SL": {
-							"type": "string"
-						},
-						"SC": {
-							"type": "string"
-						},
-						"KZ": {
-							"type": "string"
-						},
-						"KY": {
-							"type": "string"
-						},
-						"SG": {
-							"type": "string"
-						},
-						"SE": {
-							"type": "string"
-						},
-						"SD": {
-							"type": "string"
-						},
-						"DO": {
-							"type": "string"
-						},
-						"DM": {
-							"type": "string"
-						},
-						"DJ": {
-							"type": "string"
-						},
-						"DK": {
-							"type": "string"
-						},
-						"VG": {
-							"type": "string"
-						},
-						"DE": {
-							"type": "string"
-						},
-						"YE": {
-							"type": "string"
-						},
-						"DZ": {
-							"type": "string"
-						},
-						"US": {
-							"type": "string"
-						},
-						"UY": {
-							"type": "string"
-						},
-						"YT": {
-							"type": "string"
-						},
-						"UM": {
-							"type": "string"
-						},
-						"LB": {
-							"type": "string"
-						},
-						"LC": {
-							"type": "string"
-						},
-						"LA": {
-							"type": "string"
-						},
-						"TV": {
-							"type": "string"
-						},
-						"TW": {
-							"type": "string"
-						},
-						"TT": {
-							"type": "string"
-						},
-						"TR": {
-							"type": "string"
-						},
-						"LK": {
-							"type": "string"
-						},
-						"LI": {
-							"type": "string"
-						},
-						"LV": {
-							"type": "string"
-						},
-						"TO": {
-							"type": "string"
-						},
-						"LT": {
-							"type": "string"
-						},
-						"LU": {
-							"type": "string"
-						},
-						"LR": {
-							"type": "string"
-						},
-						"LS": {
-							"type": "string"
-						},
-						"TH": {
-							"type": "string"
-						},
-						"TF": {
-							"type": "string"
-						},
-						"TG": {
-							"type": "string"
-						},
-						"TD": {
-							"type": "string"
-						},
-						"TC": {
-							"type": "string"
-						},
-						"LY": {
-							"type": "string"
-						},
-						"VA": {
-							"type": "string"
-						},
-						"VC": {
-							"type": "string"
-						},
-						"AE": {
-							"type": "string"
-						},
-						"AD": {
-							"type": "string"
-						},
-						"AG": {
-							"type": "string"
-						},
-						"AF": {
-							"type": "string"
-						},
-						"AI": {
-							"type": "string"
-						},
-						"VI": {
-							"type": "string"
-						},
-						"IS": {
-							"type": "string"
-						},
-						"IR": {
-							"type": "string"
-						},
-						"AM": {
-							"type": "string"
-						},
-						"AL": {
-							"type": "string"
-						},
-						"AO": {
-							"type": "string"
-						},
-						"AQ": {
-							"type": "string"
-						},
-						"AS": {
-							"type": "string"
-						},
-						"AR": {
-							"type": "string"
-						},
-						"AU": {
-							"type": "string"
-						},
-						"AT": {
-							"type": "string"
-						},
-						"AW": {
-							"type": "string"
-						},
-						"IN": {
-							"type": "string"
-						},
-						"AX": {
-							"type": "string"
-						},
-						"AZ": {
-							"type": "string"
-						},
-						"IE": {
-							"type": "string"
-						},
-						"ID": {
-							"type": "string"
-						},
-						"UA": {
-							"type": "string"
-						},
-						"QA": {
-							"type": "string"
-						},
-						"MZ": {
-							"type": "string"
-						},
-						"sepalLength": {
-							"type": "number"
-						},
-						"sepalWidth": {
-							"type": "number"
-						},
-						"petalLength": {
-							"type": "number"
-						},
-						"petalWidth": {
-							"type": "number"
-						},
-						"species": {
-							"type": "string"
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/JsonOutput')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": "jsonoutput"
-					}
-				},
-				"schema": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+				"[concat(variables('factoryId'), '/pipelines/pipelineEventTrigger')]"
 			]
 		}
 	]
