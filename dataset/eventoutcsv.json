@@ -1,0 +1,22 @@
+{
+	"name": "eventoutcsv",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStoragekV",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "eventoutput"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
