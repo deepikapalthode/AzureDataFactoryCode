@@ -19,18 +19,6 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
-		"workingTumbling_properties_pipeline_parameters_windowstarttime": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowStartTime"
-		},
-		"workingTumbling_properties_pipeline_parameters_windowendtime": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowEndTime"
-		},
-		"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
-			"type": "string",
-			"defaultValue": "@trigger().startTime"
-		},
 		"work001tumble_properties_pipeline_parameters_windowstarttime": {
 			"type": "string",
 			"defaultValue": "@trigger().outputs.windowstarttime"
@@ -42,6 +30,18 @@
 		"work001tumble_properties_pipeline_parameters_triggerstarttime": {
 			"type": "string",
 			"defaultValue": "@trigger().starttime"
+		},
+		"workingTumbling_properties_pipeline_parameters_windowstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowStartTime"
+		},
+		"workingTumbling_properties_pipeline_parameters_windowendtime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowEndTime"
+		},
+		"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().startTime"
 		}
 	},
 	"variables": {
@@ -49,14 +49,14 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/TumblingWindowDemoWorking_copy1')]",
+			"name": "[concat(parameters('factoryName'), '/pipelineExists')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy data",
-						"type": "Copy",
+						"name": "Data flow Conditional Split",
+						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -67,100 +67,32 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
+							"dataflow": {
+								"referenceName": "dataflowConditionalSplitDemo",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceEmp": {},
+									"sourceEmployee": {},
+									"sinkTesting": {},
+									"sinkSales": {},
+									"sinkHR": {},
+									"sinkTestingemp": {},
+									"sinksalesemp": {},
+									"sinkOtheremp": {}
 								}
 							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
 							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "adls_source02",
-								"type": "DatasetReference",
-								"parameters": {
-									"dswindowstarttime": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "adls_sink02",
-								"type": "DatasetReference",
-								"parameters": {
-									"dswindowstarttime": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					},
-					{
-						"name": "Set variable1",
-						"type": "SetVariable",
-						"dependsOn": [],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "starttime",
-							"value": {
-								"value": "@substring(pipeline().parameters.windowstarttime,0,4)",
-								"type": "Expression"
-							}
+							"traceLevel": "Fine"
 						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"windowstarttime": {
-						"type": "string"
-					},
-					"windowendtime": {
-						"type": "string"
-					},
-					"triggerstarttime": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"starttime": {
-						"type": "String"
-					}
 				},
 				"annotations": []
 			},
@@ -200,6 +132,40 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/work001tumble')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "TumblingWindowDemoWorking_copy1",
+						"type": "PipelineReference"
+					},
+					"parameters": {
+						"windowstarttime": "[parameters('work001tumble_properties_pipeline_parameters_windowstarttime')]",
+						"windowendtime": "[parameters('work001tumble_properties_pipeline_parameters_windowendtime')]",
+						"triggerstarttime": "[parameters('work001tumble_properties_pipeline_parameters_triggerstarttime')]"
+					}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Minute",
+					"interval": 5,
+					"startTime": "2023-10-01T01:00:00Z",
+					"endTime": "2023-10-06T01:00:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 1,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/workingTumbling')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -232,42 +198,6 @@
 				}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/work001tumble')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "TumblingWindowDemoWorking_copy1",
-						"type": "PipelineReference"
-					},
-					"parameters": {
-						"windowstarttime": "[parameters('work001tumble_properties_pipeline_parameters_windowstarttime')]",
-						"windowendtime": "[parameters('work001tumble_properties_pipeline_parameters_windowendtime')]",
-						"triggerstarttime": "[parameters('work001tumble_properties_pipeline_parameters_triggerstarttime')]"
-					}
-				},
-				"type": "TumblingWindowTrigger",
-				"typeProperties": {
-					"frequency": "Minute",
-					"interval": 5,
-					"startTime": "2023-10-01T01:00:00Z",
-					"endTime": "2023-10-06T01:00:00Z",
-					"delay": "00:00:00",
-					"maxConcurrency": 1,
-					"retryPolicy": {
-						"intervalInSeconds": 30
-					},
-					"dependsOn": []
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/TumblingWindowDemoWorking_copy1')]"
-			]
 		}
 	]
 }
