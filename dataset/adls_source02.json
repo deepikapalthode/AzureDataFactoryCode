@@ -17,7 +17,7 @@
 				"type": "AzureBlobFSLocation",
 				"fileName": "*.csv",
 				"folderPath": {
-					"value": "@substring(dataset().dswindowstarttime,0,4)\n",
+					"value": "@substring(dataset().dswindowstarttime,5,4)\n",
 					"type": "Expression"
 				},
 				"fileSystem": "2023"
