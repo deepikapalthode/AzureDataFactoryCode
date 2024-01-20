@@ -16,7 +16,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"folderPath": {
-					"value": "@dataset().ws",
+					"value": "@substring(replace(dataset().ws,'-','/'),0,10)",
 					"type": "Expression"
 				},
 				"fileSystem": "2023output"

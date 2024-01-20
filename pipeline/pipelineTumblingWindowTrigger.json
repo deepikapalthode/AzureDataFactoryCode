@@ -51,17 +51,40 @@
 				"inputs": [
 					{
 						"referenceName": "adls_csv_source",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"ws": {
+								"value": "@pipeline().parameters.windowstarttime",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
 					{
 						"referenceName": "adls_csv_sink",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"ws": {
+								"value": "@pipeline().parameters.windowstarttime",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			}
 		],
+		"parameters": {
+			"triggerstarttime": {
+				"type": "string"
+			},
+			"windowstarttime": {
+				"type": "string"
+			},
+			"windowendtime": {
+				"type": "string"
+			}
+		},
 		"annotations": []
 	}
 }
