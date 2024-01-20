@@ -2,14 +2,14 @@
 	"name": "work001tumble",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipeline": {
 			"pipelineReference": {
 				"referenceName": "TumblingWindowDemoWorking_copy1",
 				"type": "PipelineReference"
 			},
 			"parameters": {
-				"windowstarttime": "@trigger()outputs.windowstarttime",
+				"windowstarttime": "@trigger().outputs.windowstarttime",
 				"windowendtime": "@trigger().outputs.windowendtime",
 				"triggerstarttime": "@trigger().starttime"
 			}
