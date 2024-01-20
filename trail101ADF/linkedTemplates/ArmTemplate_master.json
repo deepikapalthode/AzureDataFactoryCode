@@ -36,6 +36,10 @@
 			"type": "string",
 			"defaultValue": "blobcs"
 		},
+		"AzureDataLakeStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://trailadlsgen2storage.dfs.core.windows.net/"
+		},
 		"AzureKeyVaultLS_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://trailazurekeeyvault.vault.azure.net/"
@@ -51,10 +55,6 @@
 		"eventtrigger01_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
-		},
-		"AzureDataLakeStorage_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://trailadlsgen2storage.dfs.core.windows.net/"
 		},
 		"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
 			"type": "string",
