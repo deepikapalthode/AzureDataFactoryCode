@@ -72,6 +72,23 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "starttime",
+					"value": {
+						"value": "@substring(pipeline().parameters.windowstarttime,0,4)",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -83,6 +100,11 @@
 			},
 			"triggerstarttime": {
 				"type": "string"
+			}
+		},
+		"variables": {
+			"starttime": {
+				"type": "String"
 			}
 		},
 		"annotations": []
