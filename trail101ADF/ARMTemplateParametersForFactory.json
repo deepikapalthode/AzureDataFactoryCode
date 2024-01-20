@@ -42,13 +42,13 @@
 			"value": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
 		"workingTumbling_properties_pipeline_parameters_windowstarttime": {
-			"value": "@trigger.outputs.windowStartTime"
+			"value": "@trigger().outputs.windowStartTime"
 		},
 		"workingTumbling_properties_pipeline_parameters_windowendtime": {
-			"value": "@trigger.outputs.windowEndTime"
+			"value": "@trigger().outputs.windowEndTime"
 		},
 		"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
-			"value": "@trigger.startTime"
+			"value": "@trigger().startTime"
 		}
 	}
 }
