@@ -4427,7 +4427,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "*",
+						"fileName": "*.csv",
 						"folderPath": {
 							"value": "@substring(dataset().dswindowstarttime,0,4)\n",
 							"type": "Expression"
