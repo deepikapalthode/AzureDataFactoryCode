@@ -16,7 +16,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"folderPath": {
-					"value": "substring(replace(dataset().dswindowstarttime,'-','/'),5,4)",
+					"value": "@substring(replace(dataset().dswindowstarttime,'-','/'),5,4)",
 					"type": "Expression"
 				},
 				"fileSystem": "2023output"
