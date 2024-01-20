@@ -5922,7 +5922,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": {
-							"value": "@substring(replace(dataset().ws,'-','/'),0,10)",
+							"value": "@concat('2023/',substring(dataset().ws,1,4))",
 							"type": "Expression"
 						},
 						"fileSystem": "2023"
@@ -5971,7 +5971,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": {
-							"value": "@substring(replace(dataset().ws,'-','/'),0,10)",
+							"value": "@concat('2023/',substring(dataset().ws,1,4))",
 							"type": "Expression"
 						},
 						"fileSystem": "2023output"
