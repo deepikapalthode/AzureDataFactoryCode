@@ -19,29 +19,17 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
+		"workingTumbling_properties_pipeline_parameters_windowstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().starttime"
+			"defaultValue": "@trigger.outputs.windowStartTime"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
+		"workingTumbling_properties_pipeline_parameters_windowendtime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowstarttime"
+			"defaultValue": "@trigger.outputs.windowEndTime"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
+		"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowendtime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowStartTime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowEndTime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
-			"type": "string",
-			"defaultValue": "@trigger().startTime"
+			"defaultValue": "@trigger.startTime"
 		}
 	},
 	"variables": {
@@ -82,62 +70,27 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/tumblingwindow01')]",
+			"name": "[concat(parameters('factoryName'), '/workingTumbling')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipeline": {
 					"pipelineReference": {
-						"referenceName": "pipelineTumblingWindowTrigger",
+						"referenceName": "TumblingWindowDemoWorking",
 						"type": "PipelineReference"
 					},
 					"parameters": {
-						"triggerstarttime": "[parameters('tumblingwindow01_properties_pipeline_parameters_triggerstarttime')]",
-						"windowstarttime": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowstarttime')]",
-						"windowendtime": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowendtime')]"
+						"windowstarttime": "[parameters('workingTumbling_properties_pipeline_parameters_windowstarttime')]",
+						"windowendtime": "[parameters('workingTumbling_properties_pipeline_parameters_windowendtime')]",
+						"triggerstarttime": "[parameters('workingTumbling_properties_pipeline_parameters_triggerstarttime')]"
 					}
 				},
 				"type": "TumblingWindowTrigger",
 				"typeProperties": {
-					"frequency": "Hour",
-					"interval": 24,
-					"startTime": "2023-09-30T01:00:00Z",
-					"endTime": "2023-10-05T01:00:00Z",
-					"delay": "00:00:00",
-					"maxConcurrency": 2,
-					"retryPolicy": {
-						"count": 2,
-						"intervalInSeconds": 30
-					},
-					"dependsOn": []
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/tumblingwindowtrigger002')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "pipelineTumblingWindowDemo2",
-						"type": "PipelineReference"
-					},
-					"parameters": {
-						"windowstarttime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime')]",
-						"windowendtime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime')]",
-						"triggerstarttime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime')]"
-					}
-				},
-				"type": "TumblingWindowTrigger",
-				"typeProperties": {
-					"frequency": "Minute",
-					"interval": 5,
+					"frequency": "Month",
+					"interval": 10,
 					"startTime": "2023-10-01T01:00:00Z",
 					"endTime": "2023-10-06T01:00:00Z",
 					"delay": "00:00:00",

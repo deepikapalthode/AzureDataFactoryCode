@@ -56,29 +56,17 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
+		"workingTumbling_properties_pipeline_parameters_windowstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().starttime"
+			"defaultValue": "@trigger.outputs.windowStartTime"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
+		"workingTumbling_properties_pipeline_parameters_windowendtime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowstarttime"
+			"defaultValue": "@trigger.outputs.windowEndTime"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
+		"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowendtime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowStartTime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowEndTime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
-			"type": "string",
-			"defaultValue": "@trigger().startTime"
+			"defaultValue": "@trigger.startTime"
 		},
 		"containerUri": {
 			"type": "string",
@@ -221,23 +209,14 @@
 					"eventtrigger01_properties_typeProperties_scope": {
 						"value": "[parameters('eventtrigger01_properties_typeProperties_scope')]"
 					},
-					"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
-						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_triggerstarttime')]"
+					"workingTumbling_properties_pipeline_parameters_windowstarttime": {
+						"value": "[parameters('workingTumbling_properties_pipeline_parameters_windowstarttime')]"
 					},
-					"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
-						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowstarttime')]"
+					"workingTumbling_properties_pipeline_parameters_windowendtime": {
+						"value": "[parameters('workingTumbling_properties_pipeline_parameters_windowendtime')]"
 					},
-					"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
-						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowendtime')]"
-					},
-					"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
-						"value": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime')]"
-					},
-					"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
-						"value": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime')]"
-					},
-					"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
-						"value": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime')]"
+					"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
+						"value": "[parameters('workingTumbling_properties_pipeline_parameters_triggerstarttime')]"
 					}
 				}
 			},

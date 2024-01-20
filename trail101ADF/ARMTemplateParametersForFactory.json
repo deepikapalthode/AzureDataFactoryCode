@@ -41,23 +41,14 @@
 		"eventtrigger01_properties_typeProperties_scope": {
 			"value": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
-			"value": "@trigger().starttime"
+		"workingTumbling_properties_pipeline_parameters_windowstarttime": {
+			"value": "@trigger.outputs.windowStartTime"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
-			"value": "@trigger().outputs.windowstarttime"
+		"workingTumbling_properties_pipeline_parameters_windowendtime": {
+			"value": "@trigger.outputs.windowEndTime"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
-			"value": "@trigger().outputs.windowendtime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
-			"value": "@trigger().outputs.windowStartTime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
-			"value": "@trigger().outputs.windowEndTime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
-			"value": "@trigger().startTime"
+		"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
+			"value": "@trigger.startTime"
 		}
 	}
 }

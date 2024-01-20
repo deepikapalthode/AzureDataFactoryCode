@@ -56,35 +56,122 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
+		"workingTumbling_properties_pipeline_parameters_windowstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().starttime"
+			"defaultValue": "@trigger.outputs.windowStartTime"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
+		"workingTumbling_properties_pipeline_parameters_windowendtime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowstarttime"
+			"defaultValue": "@trigger.outputs.windowEndTime"
 		},
-		"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
+		"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowendtime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowStartTime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
-			"type": "string",
-			"defaultValue": "@trigger().outputs.windowEndTime"
-		},
-		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
-			"type": "string",
-			"defaultValue": "@trigger().startTime"
+			"defaultValue": "@trigger.startTime"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/TumblingWindowDemoWorking')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "adls_source02",
+								"type": "DatasetReference",
+								"parameters": {
+									"dswindowstarttime": {
+										"value": "@pipeline().parameters.windowstarttime",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_sink02",
+								"type": "DatasetReference",
+								"parameters": {
+									"dswindowstarttime": {
+										"value": "@pipeline().parameters.windowstarttime",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"windowstarttime": {
+						"type": "string"
+					},
+					"windowendtime": {
+						"type": "string"
+					},
+					"triggerstarttime": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_source02')]",
+				"[concat(variables('factoryId'), '/datasets/adls_sink02')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/blobToSql')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -1978,307 +2065,6 @@
 				"annotations": []
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipelineTumblingWindowDemo2')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data1",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "adls_source02",
-								"type": "DatasetReference",
-								"parameters": {
-									"dswindowstarttime": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "adls_sink02",
-								"type": "DatasetReference",
-								"parameters": {
-									"dswindowstarttime": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"windowstarttime": {
-						"type": "string"
-					},
-					"windowendtime": {
-						"type": "string"
-					},
-					"triggerstarttime": {
-						"type": "string"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/adls_source02')]",
-				"[concat(variables('factoryId'), '/datasets/adls_sink02')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipelineTumblingWindowDemo2_copy')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "adls_source02",
-								"type": "DatasetReference",
-								"parameters": {
-									"dswindowstarttime": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "adls_sink02",
-								"type": "DatasetReference",
-								"parameters": {
-									"dswindowstarttime": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"windowstarttime": {
-						"type": "string"
-					},
-					"windowendtime": {
-						"type": "string"
-					},
-					"triggerstarttime": {
-						"type": "string"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/adls_source02')]",
-				"[concat(variables('factoryId'), '/datasets/adls_sink02')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipelineTumblingWindowTrigger')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data using tumbling window trigger",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"wildcardFolderPath": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									},
-									"wildcardFileName": "*",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "adls_csv_source",
-								"type": "DatasetReference",
-								"parameters": {
-									"ws": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "adls_csv_sink",
-								"type": "DatasetReference",
-								"parameters": {
-									"ws": {
-										"value": "@pipeline().parameters.windowstarttime",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"triggerstarttime": {
-						"type": "string"
-					},
-					"windowstarttime": {
-						"type": "string"
-					},
-					"windowendtime": {
-						"type": "string"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/adls_csv_source')]",
-				"[concat(variables('factoryId'), '/datasets/adls_csv_sink')]"
-			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Advertisement')]",
@@ -5486,18 +5272,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "pipelineTumblingWindowTrigger",
-						"type": "PipelineReference"
-					},
-					"parameters": {
-						"triggerstarttime": "[parameters('tumblingwindow01_properties_pipeline_parameters_triggerstarttime')]",
-						"windowstarttime": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowstarttime')]",
-						"windowendtime": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowendtime')]"
-					}
-				},
+				"runtimeState": "Stopped",
 				"type": "TumblingWindowTrigger",
 				"typeProperties": {
 					"frequency": "Hour",
@@ -5513,9 +5288,7 @@
 					"dependsOn": []
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/pipelineTumblingWindowTrigger')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/tumblingwindowtrigger002')]",
@@ -5523,18 +5296,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "pipelineTumblingWindowDemo2",
-						"type": "PipelineReference"
-					},
-					"parameters": {
-						"windowstarttime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime')]",
-						"windowendtime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime')]",
-						"triggerstarttime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime')]"
-					}
-				},
+				"runtimeState": "Stopped",
 				"type": "TumblingWindowTrigger",
 				"typeProperties": {
 					"frequency": "Minute",
@@ -5549,9 +5311,7 @@
 					"dependsOn": []
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/pipelineTumblingWindowDemo2')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dataflowAggregateDemo')]",
@@ -6359,6 +6119,42 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/workingTumbling')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "TumblingWindowDemoWorking",
+						"type": "PipelineReference"
+					},
+					"parameters": {
+						"windowstarttime": "[parameters('workingTumbling_properties_pipeline_parameters_windowstarttime')]",
+						"windowendtime": "[parameters('workingTumbling_properties_pipeline_parameters_windowendtime')]",
+						"triggerstarttime": "[parameters('workingTumbling_properties_pipeline_parameters_triggerstarttime')]"
+					}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Month",
+					"interval": 10,
+					"startTime": "2023-10-01T01:00:00Z",
+					"endTime": "2023-10-06T01:00:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 1,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/TumblingWindowDemoWorking')]"
+			]
 		}
 	]
 }
