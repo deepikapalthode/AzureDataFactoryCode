@@ -33,7 +33,7 @@
 		},
 		"work001tumble_properties_pipeline_parameters_windowstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger()outputs.windowstarttime"
+			"defaultValue": "@trigger().outputs.windowstarttime"
 		},
 		"work001tumble_properties_pipeline_parameters_windowendtime": {
 			"type": "string",

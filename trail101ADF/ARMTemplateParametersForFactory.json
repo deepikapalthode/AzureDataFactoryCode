@@ -51,7 +51,7 @@
 			"value": "@trigger().startTime"
 		},
 		"work001tumble_properties_pipeline_parameters_windowstarttime": {
-			"value": "@trigger()outputs.windowstarttime"
+			"value": "@trigger().outputs.windowstarttime"
 		},
 		"work001tumble_properties_pipeline_parameters_windowendtime": {
 			"value": "@trigger().outputs.windowendtime"
