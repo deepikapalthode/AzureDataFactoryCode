@@ -191,15 +191,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer": {
-						"value": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer')]"
-					},
-					"eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile": {
-						"value": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile')]"
-					},
-					"eventtrigger01_properties_typeProperties_scope": {
-						"value": "[parameters('eventtrigger01_properties_typeProperties_scope')]"
 					}
 				}
 			},
@@ -220,6 +211,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer": {
+						"value": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer')]"
+					},
+					"eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile": {
+						"value": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile')]"
+					},
+					"eventtrigger01_properties_typeProperties_scope": {
+						"value": "[parameters('eventtrigger01_properties_typeProperties_scope')]"
 					},
 					"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
 						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_triggerstarttime')]"

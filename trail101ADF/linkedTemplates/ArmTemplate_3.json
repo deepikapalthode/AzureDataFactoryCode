@@ -6,18 +6,6 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "trail101ADF"
-		},
-		"eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer": {
-			"type": "string",
-			"defaultValue": "@triggerbody().folderpath"
-		},
-		"eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile": {
-			"type": "string",
-			"defaultValue": "@triggerbody().filename"
-		},
-		"eventtrigger01_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		}
 	},
 	"variables": {
@@ -1207,6 +1195,105 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipelineTumblingWindowDemo2_copy1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "adls_source02",
+								"type": "DatasetReference",
+								"parameters": {
+									"dswindowstarttime": {
+										"value": "@pipeline().parameters.windowstarttime",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_sink02",
+								"type": "DatasetReference",
+								"parameters": {
+									"dswindowstarttime": {
+										"value": "@pipeline().parameters.windowstarttime",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"windowstarttime": {
+						"type": "string"
+					},
+					"windowendtime": {
+						"type": "string"
+					},
+					"triggerstarttime": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_source02')]",
+				"[concat(variables('factoryId'), '/datasets/adls_sink02')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pipelineTumblingWindowTrigger')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1305,41 +1392,6 @@
 				"annotations": []
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/eventtrigger01')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "pipelineEventTrigger",
-							"type": "PipelineReference"
-						},
-						"parameters": {
-							"ppcontainer": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppcontainer')]",
-							"ppfile": "[parameters('eventtrigger01_properties_pipelineEventTrigger_parameters_ppfile')]"
-						}
-					}
-				],
-				"type": "BlobEventsTrigger",
-				"typeProperties": {
-					"blobPathBeginsWith": "/eventinput/blobs/",
-					"blobPathEndsWith": ".csv",
-					"ignoreEmptyBlobs": false,
-					"scope": "[parameters('eventtrigger01_properties_typeProperties_scope')]",
-					"events": [
-						"Microsoft.Storage.BlobCreated",
-						"Microsoft.Storage.BlobDeleted"
-					]
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/pipelineEventTrigger')]"
-			]
 		}
 	]
 }
