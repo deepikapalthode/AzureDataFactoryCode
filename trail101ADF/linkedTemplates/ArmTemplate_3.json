@@ -18,12 +18,225 @@
 		"eventtrigger01_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().starttime"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowstarttime"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowendtime"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflowAggregateDemo')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dsMovieRatings",
+								"type": "DatasetReference"
+							},
+							"name": "movieRatings",
+							"description": "Import data frommovieratings.csv"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "dsratings",
+								"type": "DatasetReference"
+							},
+							"name": "sinkMovieRatings"
+						}
+					],
+					"transformations": [
+						{
+							"name": "yearFilter"
+						},
+						{
+							"name": "aggregateOnRating"
+						},
+						{
+							"name": "yearColumn"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          sno as string,",
+						"          movie as string,",
+						"          releasedate as string,",
+						"          rating as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> movieRatings",
+						"movieRatings filter(toInteger(year(toDate(releasedate, 'yyyy-MM-dd', 'en-US'))) >= 2015 && toInteger(year(toDate(releasedate, 'yyyy-MM-dd', 'en-US'))) <= 2020) ~> yearFilter",
+						"yearColumn aggregate(groupBy(yearOfRelease,",
+						"          rating),",
+						"     ratingCount = count(rating)) ~> aggregateOnRating",
+						"yearFilter derive(yearOfRelease = year(toDate(releasedate,'yyyy-mm-dd','en-us'))) ~> yearColumn",
+						"aggregateOnRating sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['moviesratings'],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sinkMovieRatings"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflowColumnPatterns01')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ProductsTable",
+								"type": "DatasetReference"
+							},
+							"name": "sourceProducts"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ProductsTable",
+								"type": "DatasetReference"
+							},
+							"name": "sinkProducts"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumnPrice"
+						},
+						{
+							"name": "alterRowPrice"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          productid as integer,",
+						"          productname as string,",
+						"          price as decimal(10,4),",
+						"          brand as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceProducts",
+						"sourceProducts derive(each(match(type=='decimal'), $$ = round($$,0))) ~> derivedColumnPrice",
+						"derivedColumnPrice alterRow(updateIf(true())) ~> alterRowPrice",
+						"alterRowPrice sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          productid as integer,",
+						"          productname as string,",
+						"          price as decimal(10,4),",
+						"          brand as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['productid','productname'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkProducts"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflowColumnPatternsDemo')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "OrdersTable",
+								"type": "DatasetReference"
+							},
+							"name": "sourceOrders"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "OrdersTable",
+								"type": "DatasetReference"
+							},
+							"name": "sinkOrderTable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumnOrderDate"
+						},
+						{
+							"name": "alterRowOrderDate"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          OrderID as integer,",
+						"          ProductName as string,",
+						"          OrderDate as timestamp,",
+						"          Quantity as integer,",
+						"          ProductPrice as decimal(10,2)",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceOrders",
+						"sourceOrders derive(OrderDate = toDate(OrderDate)) ~> derivedColumnOrderDate",
+						"derivedColumnOrderDate alterRow(updateIf(true())) ~> alterRowOrderDate",
+						"alterRowOrderDate sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          OrderID as integer,",
+						"          ProductName as string,",
+						"          OrderDate as timestamp,",
+						"          Quantity as integer,",
+						"          ProductPrice as decimal(10,2)",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:false,",
+						"     updateable:true,",
+						"     upsertable:false,",
+						"     keys:['OrderID','ProductName'],",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkOrderTable"
+					]
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dataflowConditionalSplitDemo')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
@@ -430,19 +643,16 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/eventcsv')]",
+			"name": "[concat(parameters('factoryName'), '/adls_csv_source')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "AzureBlobStoragekV",
+					"referenceName": "AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"containername": {
-						"type": "string"
-					},
-					"filename": {
+					"ws": {
 						"type": "string"
 					}
 				},
@@ -450,40 +660,59 @@
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().filename",
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@substring(replace(dataset().ws,'-','/'),0,10)",
 							"type": "Expression"
 						},
-						"container": {
-							"value": "@dataset().containername",
-							"type": "Expression"
-						}
+						"fileSystem": "2023"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
-				"schema": []
+				"schema": [
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "population",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/eventoutcsv')]",
+			"name": "[concat(parameters('factoryName'), '/adls_csv_sink')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "AzureBlobStoragekV",
+					"referenceName": "AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"ws": {
+						"type": "string"
+					}
 				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": "eventoutput"
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@substring(replace(dataset().ws,'-','/'),0,10)",
+							"type": "Expression"
+						},
+						"fileSystem": "2023output"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
@@ -536,7 +765,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflowColumnPatterns01')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pipelineColumnPatternsdataFlow')]",
@@ -580,7 +811,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflowColumnPatternsDemo')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pipelineDataFlowAggregateTransformationDemo')]",
@@ -624,7 +857,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflowAggregateDemo')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pipelineDataflowColumnPatterns')]",
@@ -670,58 +905,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/dataflowDerivedColumnDemo')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipelineExists')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Data flow Conditional Split",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "dataflowConditionalSplitDemo",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"sourceEmp": {},
-									"sourceEmployee": {},
-									"sinkTesting": {},
-									"sinkSales": {},
-									"sinkHR": {},
-									"sinkTestingemp": {},
-									"sinksalesemp": {},
-									"sinkOtheremp": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/dataflowConditionalSplitDemo')]"
 			]
 		},
 		{
@@ -813,9 +996,157 @@
 				},
 				"annotations": []
 			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipelineExists')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow Conditional Split",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflowConditionalSplitDemo",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceEmp": {},
+									"sourceEmployee": {},
+									"sinkTesting": {},
+									"sinkSales": {},
+									"sinkHR": {},
+									"sinkTestingemp": {},
+									"sinksalesemp": {},
+									"sinkOtheremp": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/eventcsv')]",
-				"[concat(variables('factoryId'), '/datasets/eventoutcsv')]"
+				"[concat(variables('factoryId'), '/dataflows/dataflowConditionalSplitDemo')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipelineTumblingWindowTrigger')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "adls_csv_source",
+								"type": "DatasetReference",
+								"parameters": {
+									"ws": {
+										"value": "@pipeline().parameters.windowstarttime",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adls_csv_sink",
+								"type": "DatasetReference",
+								"parameters": {
+									"ws": {
+										"value": "@pipeline().parameters.windowstarttime",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"triggerstarttime": {
+						"type": "string"
+					},
+					"windowstarttime": {
+						"type": "string"
+					},
+					"windowendtime": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/adls_csv_source')]",
+				"[concat(variables('factoryId'), '/datasets/adls_csv_sink')]"
 			]
 		},
 		{
@@ -851,6 +1182,43 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/pipelineEventTrigger')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/tumblingwindow01')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "pipelineTumblingWindowTrigger",
+						"type": "PipelineReference"
+					},
+					"parameters": {
+						"triggerstarttime": "[parameters('tumblingwindow01_properties_pipeline_parameters_triggerstarttime')]",
+						"windowstarttime": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowstarttime')]",
+						"windowendtime": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowendtime')]"
+					}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Hour",
+					"interval": 24,
+					"startTime": "2023-09-30T01:00:00Z",
+					"endTime": "2023-10-05T01:00:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 2,
+					"retryPolicy": {
+						"count": 2,
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pipelineTumblingWindowTrigger')]"
 			]
 		}
 	]

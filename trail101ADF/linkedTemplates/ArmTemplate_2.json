@@ -19,6 +19,10 @@
 		"AzureBlobStoragekV_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "blobcs"
+		},
+		"AzureDataLakeStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://trailadlsgen2storage.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -300,6 +304,27 @@
 						"     partitionFileNames:['UniqueEmployee'],",
 						"     partitionBy('hash', 1)) ~> sink1"
 					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVaultLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "adlskey"
+					}
 				}
 			},
 			"dependsOn": []
@@ -1464,205 +1489,73 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflowAggregateDemo')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
+			"name": "[concat(parameters('factoryName'), '/eventcsv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"type": "MappingDataFlow",
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStoragekV",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"containername": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
 				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "dsMovieRatings",
-								"type": "DatasetReference"
-							},
-							"name": "movieRatings",
-							"description": "Import data frommovieratings.csv"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "dsratings",
-								"type": "DatasetReference"
-							},
-							"name": "sinkMovieRatings"
-						}
-					],
-					"transformations": [
-						{
-							"name": "yearFilter"
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
 						},
-						{
-							"name": "aggregateOnRating"
-						},
-						{
-							"name": "yearColumn"
+						"container": {
+							"value": "@dataset().containername",
+							"type": "Expression"
 						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          sno as string,",
-						"          movie as string,",
-						"          releasedate as string,",
-						"          rating as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> movieRatings",
-						"movieRatings filter(toInteger(year(toDate(releasedate, 'yyyy-MM-dd', 'en-US'))) >= 2015 && toInteger(year(toDate(releasedate, 'yyyy-MM-dd', 'en-US'))) <= 2020) ~> yearFilter",
-						"yearColumn aggregate(groupBy(yearOfRelease,",
-						"          rating),",
-						"     ratingCount = count(rating)) ~> aggregateOnRating",
-						"yearFilter derive(yearOfRelease = year(toDate(releasedate,'yyyy-mm-dd','en-us'))) ~> yearColumn",
-						"aggregateOnRating sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     partitionFileNames:['moviesratings'],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> sinkMovieRatings"
-					]
-				}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStoragekV')]"
+			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflowColumnPatterns01')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
+			"name": "[concat(parameters('factoryName'), '/eventoutcsv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"type": "MappingDataFlow",
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStoragekV",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
 				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "ProductsTable",
-								"type": "DatasetReference"
-							},
-							"name": "sourceProducts"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "ProductsTable",
-								"type": "DatasetReference"
-							},
-							"name": "sinkProducts"
-						}
-					],
-					"transformations": [
-						{
-							"name": "derivedColumnPrice"
-						},
-						{
-							"name": "alterRowPrice"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          productid as integer,",
-						"          productname as string,",
-						"          price as decimal(10,4),",
-						"          brand as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> sourceProducts",
-						"sourceProducts derive(each(match(type=='decimal'), $$ = round($$,0))) ~> derivedColumnPrice",
-						"derivedColumnPrice alterRow(updateIf(true())) ~> alterRowPrice",
-						"alterRowPrice sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          productid as integer,",
-						"          productname as string,",
-						"          price as decimal(10,4),",
-						"          brand as string",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:false,",
-						"     updateable:true,",
-						"     upsertable:false,",
-						"     keys:['productid','productname'],",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sinkProducts"
-					]
-				}
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "eventoutput"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflowColumnPatternsDemo')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "OrdersTable",
-								"type": "DatasetReference"
-							},
-							"name": "sourceOrders"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "OrdersTable",
-								"type": "DatasetReference"
-							},
-							"name": "sinkOrderTable"
-						}
-					],
-					"transformations": [
-						{
-							"name": "derivedColumnOrderDate"
-						},
-						{
-							"name": "alterRowOrderDate"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          OrderID as integer,",
-						"          ProductName as string,",
-						"          OrderDate as timestamp,",
-						"          Quantity as integer,",
-						"          ProductPrice as decimal(10,2)",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> sourceOrders",
-						"sourceOrders derive(OrderDate = toDate(OrderDate)) ~> derivedColumnOrderDate",
-						"derivedColumnOrderDate alterRow(updateIf(true())) ~> alterRowOrderDate",
-						"alterRowOrderDate sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          OrderID as integer,",
-						"          ProductName as string,",
-						"          OrderDate as timestamp,",
-						"          Quantity as integer,",
-						"          ProductPrice as decimal(10,2)",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:false,",
-						"     updateable:true,",
-						"     upsertable:false,",
-						"     keys:['OrderID','ProductName'],",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     errorHandlingOption: 'stopOnFirstError') ~> sinkOrderTable"
-					]
-				}
-			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStoragekV')]"
+			]
 		}
 	]
 }

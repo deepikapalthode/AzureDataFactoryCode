@@ -52,6 +52,22 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/5824bc85-6ad6-4e78-951c-ffbebf57b4ff/resourceGroups/TrialRG/providers/Microsoft.Storage/storageAccounts/trail1storageaccount"
 		},
+		"AzureDataLakeStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://trailadlsgen2storage.dfs.core.windows.net/"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().starttime"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowstarttime"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowendtime"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -140,6 +156,9 @@
 					},
 					"AzureBlobStoragekV_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('AzureBlobStoragekV_properties_typeProperties_connectionString_secretName')]"
+					},
+					"AzureDataLakeStorage_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorage_properties_typeProperties_url')]"
 					}
 				}
 			},
@@ -169,6 +188,15 @@
 					},
 					"eventtrigger01_properties_typeProperties_scope": {
 						"value": "[parameters('eventtrigger01_properties_typeProperties_scope')]"
+					},
+					"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
+						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_triggerstarttime')]"
+					},
+					"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
+						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowstarttime')]"
+					},
+					"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
+						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowendtime')]"
 					}
 				}
 			},
