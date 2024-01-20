@@ -68,6 +68,18 @@
 			"type": "string",
 			"defaultValue": "@trigger().startTime"
 		},
+		"work001tumble_properties_pipeline_parameters_windowstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger()outputs.windowstarttime"
+		},
+		"work001tumble_properties_pipeline_parameters_windowendtime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowendtime"
+		},
+		"work001tumble_properties_pipeline_parameters_triggerstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().starttime"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -217,6 +229,15 @@
 					},
 					"workingTumbling_properties_pipeline_parameters_triggerstarttime": {
 						"value": "[parameters('workingTumbling_properties_pipeline_parameters_triggerstarttime')]"
+					},
+					"work001tumble_properties_pipeline_parameters_windowstarttime": {
+						"value": "[parameters('work001tumble_properties_pipeline_parameters_windowstarttime')]"
+					},
+					"work001tumble_properties_pipeline_parameters_windowendtime": {
+						"value": "[parameters('work001tumble_properties_pipeline_parameters_windowendtime')]"
+					},
+					"work001tumble_properties_pipeline_parameters_triggerstarttime": {
+						"value": "[parameters('work001tumble_properties_pipeline_parameters_triggerstarttime')]"
 					}
 				}
 			},
