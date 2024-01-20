@@ -5,11 +5,20 @@
 			"referenceName": "AzureDataLakeStorage",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"dswindowstarttime": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@concat('2023output/',substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))",
+					"type": "Expression"
+				},
 				"fileSystem": "2023output"
 			},
 			"columnDelimiter": ",",
