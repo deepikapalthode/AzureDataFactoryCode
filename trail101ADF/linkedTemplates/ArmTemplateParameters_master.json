@@ -51,13 +51,13 @@
 			"value": "@trigger().outputs.windowendtime"
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
-			"value": "@trigger().outputs.windowstarttime"
+			"value": "@trigger().outputs.windowStartTime"
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
-			"value": "@trigger().outputs.windowendtime"
+			"value": "@trigger().outputs.windowEndTime"
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
-			"value": "@trigger().starttime"
+			"value": "@trigger().startTime"
 		},
 		"containerUri": {
 			"value": ""

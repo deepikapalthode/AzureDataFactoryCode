@@ -70,15 +70,15 @@
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowstarttime"
+			"defaultValue": "@trigger().outputs.windowStartTime"
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowendtime"
+			"defaultValue": "@trigger().outputs.windowEndTime"
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().starttime"
+			"defaultValue": "@trigger().startTime"
 		},
 		"containerUri": {
 			"type": "string",

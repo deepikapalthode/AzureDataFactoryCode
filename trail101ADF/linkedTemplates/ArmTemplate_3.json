@@ -44,7 +44,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": {
-							"value": "@concat('2023output/',substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))",
+							"value": "@concat(substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))",
 							"type": "Expression"
 						},
 						"fileSystem": "2023output"
@@ -79,7 +79,7 @@
 						"type": "AzureBlobFSLocation",
 						"fileName": "*",
 						"folderPath": {
-							"value": "@concat('2023/',substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))\n",
+							"value": "@concat(substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))\n",
 							"type": "Expression"
 						},
 						"fileSystem": "2023"
@@ -1131,10 +1131,6 @@
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
 									"recursive": true,
-									"wildcardFolderPath": {
-										"value": "@pipeline().parameters.triggerstarttime",
-										"type": "Expression"
-									},
 									"wildcardFileName": "*",
 									"enablePartitionDiscovery": false
 								},

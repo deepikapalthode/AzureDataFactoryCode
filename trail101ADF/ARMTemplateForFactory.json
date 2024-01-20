@@ -70,15 +70,15 @@
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowstarttime"
+			"defaultValue": "@trigger().outputs.windowStartTime"
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
 			"type": "string",
-			"defaultValue": "@trigger().outputs.windowendtime"
+			"defaultValue": "@trigger().outputs.windowEndTime"
 		},
 		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
 			"type": "string",
-			"defaultValue": "@trigger().starttime"
+			"defaultValue": "@trigger().startTime"
 		}
 	},
 	"variables": {
@@ -2003,10 +2003,6 @@
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
 									"recursive": true,
-									"wildcardFolderPath": {
-										"value": "@pipeline().parameters.triggerstarttime",
-										"type": "Expression"
-									},
 									"wildcardFileName": "*",
 									"enablePartitionDiscovery": false
 								},
@@ -4489,7 +4485,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": {
-							"value": "@concat('2023output/',substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))",
+							"value": "@concat(substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))",
 							"type": "Expression"
 						},
 						"fileSystem": "2023output"
@@ -4526,7 +4522,7 @@
 						"type": "AzureBlobFSLocation",
 						"fileName": "*",
 						"folderPath": {
-							"value": "@concat('2023/',substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))\n",
+							"value": "@concat(substring(dataset().dswindowstarttime,0,2),'/',substring(dataset().dswindowstarttime,2,3))\n",
 							"type": "Expression"
 						},
 						"fileSystem": "2023"
