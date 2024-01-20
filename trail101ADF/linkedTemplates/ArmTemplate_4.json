@@ -1,0 +1,109 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "trail101ADF"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().starttime"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_windowstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowstarttime"
+		},
+		"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowendtime"
+		},
+		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowstarttime"
+		},
+		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowendtime"
+		},
+		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().starttime"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/tumblingwindow01')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "pipelineTumblingWindowTrigger",
+						"type": "PipelineReference"
+					},
+					"parameters": {
+						"triggerstarttime": "[parameters('tumblingwindow01_properties_pipeline_parameters_triggerstarttime')]",
+						"windowstarttime": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowstarttime')]",
+						"windowendtime": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowendtime')]"
+					}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Hour",
+					"interval": 24,
+					"startTime": "2023-09-30T01:00:00Z",
+					"endTime": "2023-10-05T01:00:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 2,
+					"retryPolicy": {
+						"count": 2,
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/tumblingwindowtrigger002')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "pipelineTumblingWindowDemo2",
+						"type": "PipelineReference"
+					},
+					"parameters": {
+						"windowstarttime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime')]",
+						"windowendtime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime')]",
+						"triggerstarttime": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime')]"
+					}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Minute",
+					"interval": 5,
+					"startTime": "2023-10-01T01:00:00Z",
+					"endTime": "2023-10-06T01:00:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 1,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

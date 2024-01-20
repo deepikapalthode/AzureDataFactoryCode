@@ -68,6 +68,18 @@
 			"type": "string",
 			"defaultValue": "@trigger().outputs.windowendtime"
 		},
+		"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowstarttime"
+		},
+		"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowendtime"
+		},
+		"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
+			"type": "string",
+			"defaultValue": "@trigger().starttime"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -188,6 +200,26 @@
 					},
 					"eventtrigger01_properties_typeProperties_scope": {
 						"value": "[parameters('eventtrigger01_properties_typeProperties_scope')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'trail101ADF_ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "trail101ADF_ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
 					},
 					"tumblingwindow01_properties_pipeline_parameters_triggerstarttime": {
 						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_triggerstarttime')]"
@@ -197,11 +229,20 @@
 					},
 					"tumblingwindow01_properties_pipeline_parameters_windowendtime": {
 						"value": "[parameters('tumblingwindow01_properties_pipeline_parameters_windowendtime')]"
+					},
+					"tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime": {
+						"value": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowstarttime')]"
+					},
+					"tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime": {
+						"value": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_windowendtime')]"
+					},
+					"tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime": {
+						"value": "[parameters('tumblingwindowtrigger002_properties_pipeline_parameters_triggerstarttime')]"
 					}
 				}
 			},
 			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'trail101ADF_ArmTemplate_2')]"
+				"[resourceId('Microsoft.Resources/deployments', 'trail101ADF_ArmTemplate_3')]"
 			]
 		}
 	]
