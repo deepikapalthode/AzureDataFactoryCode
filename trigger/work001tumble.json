@@ -2,7 +2,7 @@
 	"name": "work001tumble",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipeline": {
 			"pipelineReference": {
 				"referenceName": "TumblingWindowDemoWorking_copy1",
