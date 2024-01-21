@@ -1,0 +1,9 @@
+{
+	"name": "secondTrailFactory",
+	"location": "eastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "1d70a2bf-f7b0-4720-b66b-ae44ceab4303",
+		"tenantId": "bf003e20-d3dd-43b6-aff0-1233e0bbdd55"
+	}
+}
