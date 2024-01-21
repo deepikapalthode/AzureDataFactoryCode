@@ -59,7 +59,17 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"waitOnCompletion": true
+								"pipeline": {
+									"referenceName": "pipelineChild001",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"ppfoldername": {
+										"value": "@item().name",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
