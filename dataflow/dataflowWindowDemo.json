@@ -1,0 +1,30 @@
+{
+	"name": "dataflowWindowDemo",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "emptable",
+						"type": "DatasetReference"
+					},
+					"name": "employeeSource"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "window1"
+				}
+			],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> employeeSource",
+				"employeeSource window() ~> window1"
+			]
+		}
+	}
+}
