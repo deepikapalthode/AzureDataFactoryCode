@@ -1,0 +1,9 @@
+{
+	"name": "ayodhyaADF",
+	"location": "eastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "60e5a710-aa41-4ace-9f3e-5b4cb4fbb781",
+		"tenantId": "bf003e20-d3dd-43b6-aff0-1233e0bbdd55"
+	}
+}
