@@ -13,88 +13,6 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/DSblobsource')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorage1",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"container": "input"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "Date ",
-						"type": "String"
-					},
-					{
-						"name": "series ",
-						"type": "String"
-					},
-					{
-						"name": "OPEN ",
-						"type": "String"
-					},
-					{
-						"name": "HIGH ",
-						"type": "String"
-					},
-					{
-						"name": "LOW ",
-						"type": "String"
-					},
-					{
-						"name": "PREV. CLOSE ",
-						"type": "String"
-					},
-					{
-						"name": "ltp ",
-						"type": "String"
-					},
-					{
-						"name": "close ",
-						"type": "String"
-					},
-					{
-						"name": "vwap ",
-						"type": "String"
-					},
-					{
-						"name": "52W H ",
-						"type": "String"
-					},
-					{
-						"name": "52W L ",
-						"type": "String"
-					},
-					{
-						"name": "VOLUME ",
-						"type": "String"
-					},
-					{
-						"name": "VALUE ",
-						"type": "String"
-					},
-					{
-						"name": "No of trades ",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/DScsvOut11')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -2423,6 +2341,25 @@
 					"quoteChar": "\""
 				},
 				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/emptable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "emp"
+				}
 			},
 			"dependsOn": []
 		}
