@@ -12,18 +12,47 @@
 					"name": "employeeSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "AzureBlobStorage1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkWindowTransformation"
+				}
+			],
 			"transformations": [
 				{
 					"name": "window1"
 				}
 			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          empid as integer,",
+				"          empname as string,",
+				"          salary as decimal(10,2),",
+				"          hire_date as date,",
+				"          dept as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> employeeSource",
-				"employeeSource window() ~> window1"
+				"employeeSource window(over(dept),",
+				"     desc(salary, true),",
+				"     SalaryRank = denseRank()) ~> window1",
+				"window1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delimited',",
+				"     container: 'out10',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true,",
+				"     partitionFileNames:['WindowTransformationOutput'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sinkWindowTransformation"
 			]
 		}
 	}
